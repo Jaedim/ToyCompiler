@@ -1,8 +1,21 @@
 // NOTE TO SELF:
-//   -REARRANGE STATES BELOW
 //   -ADD LOGIC TO PRODUCE SYMBOL TABLE
+/********
+* Notes:
+*   -States below should be organized to their respective sections:
+*       -Keywords and then constants (then id should always be last)
+*       -Brace symbols
+*       -Boolean operators
+*       -Mathematical operators
+*       -Miscellaneous
+*   -Keyword states should be organized alphabetically to ensure that
+*       keywords with similar characters at the start are not predisposed
+*   -
+*********/
 class Toy {
     public static void main(String args[]) throws java.io.IOException {
+        // Enable debugging output or not (default: false)
+        Info.debugMode = true;
         Yylex yy = new Yylex(System.in);
         Yytoken t;
         while ((t = yy.yylex()) != null) {
@@ -10,17 +23,38 @@ class Toy {
         }
     }
 }
+// Used only to print debugging info or lexical errors in the input code.
+// This information will not be passed to the semantic parser.
+// To disable info output, set "debugMode" to false at start of main method.
+class Info {
+    public static boolean debugMode = false;
+    public enum Error {
+        UNCLOSED_STRING
+    };
+    public void throwError(Error e) {
+        if (!debugMode) return;
+        if (e == Error.UNCLOSED_STRING) {
+            System.out.println("UNCLOSED_STRING_ERROR");
+        }
+    }
+}
+// This class is required for JLex to work.
+// Handles the token generation as stated below in the subroutines.
 class Yytoken {
     private int index;
     private String type;
+    // The constructor used for most subroutines.
     public Yytoken(int index, String type) {
         this.index = index;
         this.type = type;
     }
+    // Default constructor that's used to generate newlines in the
+    //   output.
     public Yytoken() {
         this.index = -1;
         this.type = "newline";
     }
+    // Used for outputting information for 
     public String toString() {    
         if (type.equals("newline"))
             return "\n";
@@ -86,10 +120,10 @@ class Yylex {
 	private final int COMMENT = 2;
 	private final int yy_state_dtrans[] = {
 		0,
-		63,
-		65,
-		69,
-		73
+		76,
+		78,
+		82,
+		84
 	};
 	private void yybegin (int state) {
 		yy_lexical_state = state;
@@ -303,30 +337,30 @@ class Yylex {
 		/* 58 */ YY_NO_ANCHOR,
 		/* 59 */ YY_NO_ANCHOR,
 		/* 60 */ YY_NO_ANCHOR,
-		/* 61 */ YY_NOT_ACCEPT,
+		/* 61 */ YY_NO_ANCHOR,
 		/* 62 */ YY_NO_ANCHOR,
-		/* 63 */ YY_NOT_ACCEPT,
-		/* 64 */ YY_NO_ANCHOR,
-		/* 65 */ YY_NOT_ACCEPT,
+		/* 63 */ YY_NO_ANCHOR,
+		/* 64 */ YY_NOT_ACCEPT,
+		/* 65 */ YY_NO_ANCHOR,
 		/* 66 */ YY_NO_ANCHOR,
-		/* 67 */ YY_NOT_ACCEPT,
-		/* 68 */ YY_NO_ANCHOR,
-		/* 69 */ YY_NOT_ACCEPT,
-		/* 70 */ YY_NO_ANCHOR,
-		/* 71 */ YY_NOT_ACCEPT,
-		/* 72 */ YY_NO_ANCHOR,
-		/* 73 */ YY_NOT_ACCEPT,
-		/* 74 */ YY_NO_ANCHOR,
+		/* 67 */ YY_NO_ANCHOR,
+		/* 68 */ YY_NOT_ACCEPT,
+		/* 69 */ YY_NO_ANCHOR,
+		/* 70 */ YY_NOT_ACCEPT,
+		/* 71 */ YY_NO_ANCHOR,
+		/* 72 */ YY_NOT_ACCEPT,
+		/* 73 */ YY_NO_ANCHOR,
+		/* 74 */ YY_NOT_ACCEPT,
 		/* 75 */ YY_NO_ANCHOR,
-		/* 76 */ YY_NO_ANCHOR,
+		/* 76 */ YY_NOT_ACCEPT,
 		/* 77 */ YY_NO_ANCHOR,
-		/* 78 */ YY_NO_ANCHOR,
+		/* 78 */ YY_NOT_ACCEPT,
 		/* 79 */ YY_NO_ANCHOR,
-		/* 80 */ YY_NO_ANCHOR,
+		/* 80 */ YY_NOT_ACCEPT,
 		/* 81 */ YY_NO_ANCHOR,
-		/* 82 */ YY_NO_ANCHOR,
+		/* 82 */ YY_NOT_ACCEPT,
 		/* 83 */ YY_NO_ANCHOR,
-		/* 84 */ YY_NO_ANCHOR,
+		/* 84 */ YY_NOT_ACCEPT,
 		/* 85 */ YY_NO_ANCHOR,
 		/* 86 */ YY_NO_ANCHOR,
 		/* 87 */ YY_NO_ANCHOR,
@@ -392,105 +426,95 @@ class Yylex {
 		/* 147 */ YY_NO_ANCHOR,
 		/* 148 */ YY_NO_ANCHOR,
 		/* 149 */ YY_NO_ANCHOR,
-		/* 150 */ YY_NO_ANCHOR
+		/* 150 */ YY_NO_ANCHOR,
+		/* 151 */ YY_NO_ANCHOR,
+		/* 152 */ YY_NO_ANCHOR,
+		/* 153 */ YY_NO_ANCHOR,
+		/* 154 */ YY_NO_ANCHOR,
+		/* 155 */ YY_NO_ANCHOR,
+		/* 156 */ YY_NO_ANCHOR,
+		/* 157 */ YY_NO_ANCHOR,
+		/* 158 */ YY_NO_ANCHOR
 	};
 	private int yy_cmap[] = unpackFromString(1,130,
-"50:8,2:2,1,50:21,2,32,49,50:2,19,43,50,39,45,38,18,23,30,33,42,25:10,50,44," +
-"31,21,20,50:2,47:26,24,50,34,50,48,50,7,3,35,28,6,36,29,41,10,47,26,5,11,8," +
-"4,12,47,15,9,13,17,37,14,27,16,47,40,22,46,50:2,0:2")[0];
+"54:8,2:2,1,54:21,2,42,51,54:2,49,45,54,35,36,48,29,52,47,27,50,30,26:9,54,5" +
+"3,44,41,43,54:2,31:4,28,31,33:17,32,33:2,39,54,40,54,34,54,7,3,11,13,6,17,2" +
+"3,25,18,33,10,5,19,8,4,20,33,9,12,16,14,24,21,15,22,33,37,46,38,54:2,0:2")[0];
 
-	private int yy_rmap[] = unpackFromString(1,151,
-"0,1:3,2,1:2,3,4,1:3,5,1,6,7,1:10,8,1:2,9,1:3,10,11,8:18,1:4,12,1:3,13,14,15" +
-",16,17,18,19,20,21,22,12,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39" +
-",40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,8," +
-"64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88," +
-"89,90,8,91,92,93,94,95,96,97,98,99")[0];
+	private int yy_rmap[] = unpackFromString(1,159,
+"0,1:3,2,3,1:8,4,5,6,7,1:7,8,9,1:6,10,8,11,12,8:17,1:3,13,1:6,14,15,16,17,18" +
+",19,12,20,21,22,17,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41" +
+",42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66" +
+",67,68,8,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90," +
+"91,92,93,94,95,8,96,97,98,99,100,101,102,103,104")[0];
 
-	private int yy_nxt[][] = unpackFromString(100,51,
-"1,2,3,4,141:2,109,141,89,144,62,141,145,110,146,147,141:2,5,6,7,8,9,10,11,1" +
-"2,141:2,148,141,13,14,15,16,17,149,90,111,18,19,20,141,21,61,22,23,24,141,-" +
-"1,25,-1:55,141,150,141:10,112,141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5" +
-",141,113,-1:23,27,-1:50,28,-1:54,12,-1:7,29,-1:38,30,-1:50,31,-1:32,141:15," +
-"-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:27,29,-1:28,141:4,132,14" +
-"1:10,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:3,143,141:11," +
-"-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:4,71:47,57,71,-1:43,32,-" +
-"1:10,141:5,66,141:2,116,141:6,-1:7,113,141:4,-1:5,141,26,141,-1:3,141,-1:5," +
-"141,113,-1:2,1,53,54:37,-1,54:5,-1,54:5,-1:3,141:11,33,141:3,-1:7,113,141:4" +
-",-1:5,141:3,-1:3,141,-1:5,141,113,-1:2,1,55:37,67,55:3,-1,55:8,-1:3,141:10," +
-"34,141:4,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:44,56,-1:11,141" +
-":12,35,141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:2,1,-1,71:4" +
-"7,57,71,-1:3,141:3,36,141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,11" +
-"3,-1:5,141:2,37,141:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:2" +
-",1,58:21,-1,58:15,59,-1,58:2,60,58:2,-1,58:5,-1:3,141:3,38,141:11,-1:7,113," +
-"141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:15,-1:7,113,141:2,39,141,-1" +
-":5,141:3,-1:3,141,-1:5,141,113,-1:5,141:15,-1:7,113,40,141:3,-1:5,141:3,-1:" +
-"3,141,-1:5,141,113,-1:5,141:3,41,141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141," +
-"-1:5,141,113,-1:5,141:6,42,141:8,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,14" +
-"1,113,-1:5,141:15,-1:7,113,141:3,43,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,1" +
-"41:5,44,141:9,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:5,45" +
-",141:9,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:3,46,141:11" +
-",-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:5,47,141:9,-1:7,1" +
-"13,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:6,48,141:8,-1:7,113,141:" +
-"4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:5,49,141:9,-1:7,113,141:4,-1:5," +
-"141:3,-1:3,141,-1:5,141,113,-1:5,141:13,50,141,-1:7,113,141:4,-1:5,141:3,-1" +
-":3,141,-1:5,141,113,-1:5,141:3,51,141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141" +
-",-1:5,141,113,-1:5,141:6,52,141:8,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,1" +
-"41,113,-1:5,141:3,64,141:10,92,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141," +
-"113,-1:5,141,68,141:2,122,141:10,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,14" +
-"1,113,-1:5,141:6,70,141:8,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-" +
-"1:5,141:2,72,141:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,14" +
-"1:14,74,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:7,75,141:7" +
-",-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:4,76,141:10,-1:7," +
-"113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:2,77,141:12,-1:7,113,14" +
-"1:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:6,78,141:8,-1:7,113,141:4,-1:" +
-"5,141:3,-1:3,141,-1:5,141,113,-1:5,141:6,74,141:8,-1:7,113,141:4,-1:5,141:3" +
-",-1:3,141,-1:5,141,113,-1:5,141:5,79,141:9,-1:7,113,141:4,-1:5,141:3,-1:3,1" +
-"41,-1:5,141,113,-1:5,141:2,80,141:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:" +
-"5,141,113,-1:5,141:12,81,141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141," +
-"113,-1:5,141:2,82,141:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1" +
-":5,141:4,83,141:10,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141" +
-":15,-1:7,113,141:2,84,141,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:2,85,14" +
-"1:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:4,86,141:10,-" +
-"1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:15,-1:7,113,141:4,-" +
-"1:5,87,141:2,-1:3,141,-1:5,141,113,-1:5,141:10,88,141:4,-1:7,113,141:4,-1:5" +
-",141:3,-1:3,141,-1:5,141,113,-1:5,141:2,91,141:12,-1:7,113,141,114,141:2,-1" +
-":5,141:3,-1:3,141,-1:5,141,113,-1:5,141:12,93,141:2,-1:7,113,141:4,-1:5,141" +
-":3,-1:3,141,-1:5,141,113,-1:5,141,94,141:13,-1:7,113,141:4,-1:5,141:3,-1:3," +
-"141,-1:5,141,113,-1:5,141:3,95,141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1" +
-":5,141,113,-1:5,141:10,124,141:4,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,14" +
-"1,113,-1:5,141:12,125,141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113" +
-",-1:5,141:9,142,141:5,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5," +
-"141:7,126,141:7,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:7," +
-"96,141:7,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:4,127,141" +
-":5,128,141:4,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:14,12" +
-"9,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:4,97,141:10,-1:7" +
-",113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:2,98,141:12,-1:7,113,1" +
-"41:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:2,130,141:12,-1:7,113,141:4," +
-"-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:3,131,141:11,-1:7,113,141:4,-1:5," +
-"141:3,-1:3,141,-1:5,141,113,-1:5,141:7,99,141:7,-1:7,113,141:4,-1:5,141:3,-" +
-"1:3,141,-1:5,141,113,-1:5,141:5,134,141:9,-1:7,113,141:4,-1:5,141:3,-1:3,14" +
-"1,-1:5,141,113,-1:5,141:15,-1:7,113,141:2,100,141,-1:5,141:3,-1:3,141,-1:5," +
-"141,113,-1:5,141:14,101,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:" +
-"5,102,141:14,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:3,103" +
-",141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:5,104,141:" +
-"9,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:12,135,141:2,-1:" +
-"7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:3,137,141:11,-1:7,113" +
-",141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:10,105,141:4,-1:7,113,141:" +
-"4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:12,106,141:2,-1:7,113,141:4,-1:" +
-"5,141:3,-1:3,141,-1:5,141,113,-1:5,141:15,-1:7,113,141:4,-1:5,141,138,141,-" +
-"1:3,141,-1:5,141,113,-1:5,141:8,139,141:6,-1:7,113,141:4,-1:5,141:3,-1:3,14" +
-"1,-1:5,141,113,-1:5,141:4,107,141:10,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:" +
-"5,141,113,-1:5,141:3,140,141:11,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141" +
-",113,-1:5,141:5,108,141:9,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-" +
-"1:5,141:2,133,141:12,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,1" +
-"41:12,136,141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:10" +
-",115,141:4,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:12,117," +
-"141:2,-1:7,113,141:4,-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141:15,-1:7,113," +
-"141:4,-1:5,141:3,-1:3,118,-1:5,141,113,-1:5,141:3,119,141:11,-1:7,113,141:4" +
-",-1:5,141:3,-1:3,141,-1:5,141,113,-1:5,141,120,141:13,-1:7,113,141:4,-1:5,1" +
-"41:3,-1:3,141,-1:5,141,113,-1:5,141:2,121,141:12,-1:7,113,141:4,-1:5,141:3," +
-"-1:3,141,-1:5,141,113,-1:5,141,123,141:13,-1:7,113,141:4,-1:5,141:3,-1:3,14" +
-"1,-1:5,141,113,-1:2");
+	private int yy_nxt[][] = unpackFromString(105,55,
+"1,2,3,4,149:2,117,149,97,152,149,153,154,155,149:2,118,98,65,149,156,157,14" +
+"9:2,119,149,5,6,149,7,66,149:3,-1,8,9,10,11,12,13,14,15,16,17,64,68,18,19,2" +
+"0,21,22,23,24,-1:59,149,158,149:4,120,149:16,121,-1,149,-1,121,149:3,121,-1" +
+":46,5,26,-1:2,5,-1:65,27,-1:54,28,-1:54,29,-1:54,30,-1:16,149:23,121,-1,149" +
+",-1,121,149:3,121,-1:26,72,-1:19,26,-1,72,-1,26,-1:27,149:4,140,149:18,121," +
+"-1,149,-1,121,149:3,121,-1:23,149:3,151,149:19,121,-1,149,-1,121,149:3,121," +
+"-1:23,36,-1:2,36:2,-1:3,36,-1,36,-1:3,36,-1:8,36,-1,36,-1,36:2,-1:24,58,-1:" +
+"98,31,-1:12,149:5,73,149:8,25,149,128,149:6,121,-1,149,-1,121,149:3,121,-1:" +
+"35,70,-1:10,5,26,-1:2,5,-1,70,-1:48,67,-1:3,67,-1:70,32,-1:11,149:18,33,149" +
+":4,121,-1,149,-1,121,149:3,121,-1:23,149:6,34,149:16,121,-1,149,-1,121,149:" +
+"3,121,-1:49,74,-1:28,149:13,35,149:9,121,-1,149,-1,121,149:3,121,-1:23,149:" +
+"3,37,149:19,121,-1,149,-1,121,149:3,121,-1:20,1,54,55:33,-1:2,55:18,-1:3,14" +
+"9:2,38,149:20,121,-1,149,-1,121,149:3,121,-1:20,1,56:47,80,56,-1,56:4,-1:3," +
+"149:3,39,149:19,121,-1,149,-1,121,149:3,121,-1:70,57,-1:7,149:10,40,149:12," +
+"121,-1,149,-1,121,149:3,121,-1:20,1,59,60:33,-1:2,60:9,-1,60:4,59,60:3,-1:3" +
+",149:7,41,149:15,121,-1,149,-1,121,149:3,121,-1:20,1,61:34,-1:2,61:9,-1,61," +
+"62,61,63,61:4,-1:3,149:9,42,149:13,121,-1,149,-1,121,149:3,121,-1:23,149:3," +
+"43,149:19,121,-1,149,-1,121,149:3,121,-1:23,149:5,44,149:17,121,-1,149,-1,1" +
+"21,149:3,121,-1:23,149:5,45,149:17,121,-1,149,-1,121,149:3,121,-1:23,149:20" +
+",46,149:2,121,-1,149,-1,121,149:3,121,-1:23,149:3,47,149:19,121,-1,149,-1,1" +
+"21,149:3,121,-1:23,149:5,48,149:17,121,-1,149,-1,121,149:3,121,-1:23,149:9," +
+"49,149:13,121,-1,149,-1,121,149:3,121,-1:23,149:5,50,149:17,121,-1,149,-1,1" +
+"21,149:3,121,-1:23,149:19,51,149:3,121,-1,149,-1,121,149:3,121,-1:23,149:3," +
+"52,149:19,121,-1,149,-1,121,149:3,121,-1:23,149:9,53,149:13,121,-1,149,-1,1" +
+"21,149:3,121,-1:23,149:3,69,149:7,100,149:11,121,-1,149,-1,121,149:3,121,-1" +
+":23,149,71,149:2,127,149:18,121,-1,149,-1,121,149:3,121,-1:23,149:9,75,149:" +
+"13,121,-1,149,-1,121,149:3,121,-1:23,149:2,77,149:20,121,-1,149,-1,121,149:" +
+"3,121,-1:23,149:11,79,149:11,121,-1,149,-1,121,149:3,121,-1:23,149:15,81,14" +
+"9:7,121,-1,149,-1,121,149:3,121,-1:23,149:4,83,149:18,121,-1,149,-1,121,149" +
+":3,121,-1:23,149:9,85,149:13,121,-1,149,-1,121,149:3,121,-1:23,149:9,79,149" +
+":13,121,-1,149,-1,121,149:3,121,-1:23,149:2,86,149:20,121,-1,149,-1,121,149" +
+":3,121,-1:23,149:2,87,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:6,88,149" +
+":16,121,-1,149,-1,121,149:3,121,-1:23,149:5,89,149:17,121,-1,149,-1,121,149" +
+":3,121,-1:23,149:2,90,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:4,91,149" +
+":18,121,-1,149,-1,121,149:3,121,-1:23,149:10,92,149:12,121,-1,149,-1,121,14" +
+"9:3,121,-1:23,149:2,93,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:4,94,14" +
+"9:18,121,-1,149,-1,121,149:3,121,-1:23,149:8,95,149:14,121,-1,149,-1,121,14" +
+"9:3,121,-1:23,149:13,96,149:9,121,-1,149,-1,121,149:3,121,-1:23,149:2,99,14" +
+"9:9,122,149:10,121,-1,149,-1,121,149:3,121,-1:23,149:6,101,149:16,121,-1,14" +
+"9,-1,121,149:3,121,-1:23,149,102,149:21,121,-1,149,-1,121,149:3,121,-1:23,1" +
+"49:3,103,149:19,121,-1,149,-1,121,149:3,121,-1:23,149:13,132,149:9,121,-1,1" +
+"49,-1,121,149:3,121,-1:23,149:4,133,149:8,134,149:9,121,-1,149,-1,121,149:3" +
+",121,-1:23,149:4,104,149:18,121,-1,149,-1,121,149:3,121,-1:23,149:6,135,149" +
+":16,121,-1,149,-1,121,149:3,121,-1:23,149:11,136,149:11,121,-1,149,-1,121,1" +
+"49:3,121,-1:23,149:2,105,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:17,15" +
+"0,149:5,121,-1,149,-1,121,149:3,121,-1:23,149:15,137,149:7,121,-1,149,-1,12" +
+"1,149:3,121,-1:23,149:15,106,149:7,121,-1,149,-1,121,149:3,121,-1:23,149:2," +
+"138,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:3,139,149:19,121,-1,149,-1" +
+",121,149:3,121,-1:23,149:10,107,149:12,121,-1,149,-1,121,149:3,121,-1:23,14" +
+"9:11,108,149:11,121,-1,149,-1,121,149:3,121,-1:23,149:15,109,149:7,121,-1,1" +
+"49,-1,121,149:3,121,-1:23,110,149:22,121,-1,149,-1,121,149:3,121,-1:23,149:" +
+"5,142,149:17,121,-1,149,-1,121,149:3,121,-1:23,149:3,111,149:19,121,-1,149," +
+"-1,121,149:3,121,-1:23,149:5,112,149:17,121,-1,149,-1,121,149:3,121,-1:23,1" +
+"49:6,143,149:16,121,-1,149,-1,121,149:3,121,-1:23,149:3,145,149:19,121,-1,1" +
+"49,-1,121,149:3,121,-1:23,149:13,113,149:9,121,-1,149,-1,121,149:3,121,-1:2" +
+"3,149:6,114,149:16,121,-1,149,-1,121,149:3,121,-1:23,149:14,146,149:8,121,-" +
+"1,149,-1,121,149:3,121,-1:23,149:16,147,149:6,121,-1,149,-1,121,149:3,121,-" +
+"1:23,149:4,115,149:18,121,-1,149,-1,121,149:3,121,-1:23,149:3,148,149:19,12" +
+"1,-1,149,-1,121,149:3,121,-1:23,149:5,116,149:17,121,-1,149,-1,121,149:3,12" +
+"1,-1:23,149:2,141,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:6,144,149:16" +
+",121,-1,149,-1,121,149:3,121,-1:23,149:3,123,149:19,121,-1,149,-1,121,149:3" +
+",121,-1:23,149:2,124,149:20,121,-1,149,-1,121,149:3,121,-1:23,149:13,125,14" +
+"9:9,121,-1,149,-1,121,149:3,121,-1:23,149,126,149:21,121,-1,149,-1,121,149:" +
+"3,121,-1:23,149:6,129,149:16,121,-1,149,-1,121,149:3,121,-1:23,149:22,130,1" +
+"21,-1,149,-1,121,149:3,121,-1:23,149,131,149:21,121,-1,149,-1,121,149:3,121" +
+",-1:20");
 
 	public Yytoken yylex ()
 		throws java.io.IOException {
@@ -549,71 +573,71 @@ class Yylex {
 					case -4:
 						break;
 					case 4:
-						{ return (new Yytoken(0, "id")); }
+						{ return (new Yytoken(24, "id")); }
 					case -5:
 						break;
 					case 5:
-						{ return (new Yytoken(0, "plus")); }
+						{ return (new Yytoken(23, "intconstant")); }
 					case -6:
 						break;
 					case 6:
-						{ return (new Yytoken(0, "mod")); }
+						{ return (new Yytoken(47, "period")); }
 					case -7:
 						break;
 					case 7:
-						{ return (new Yytoken(0, "greater")); }
+						{ return (new Yytoken(41, "plus")); }
 					case -8:
 						break;
 					case 8:
-						{ return (new Yytoken(0, "assignop")); }
+						{ return (new Yytoken(25, "leftparen")); }
 					case -9:
 						break;
 					case 9:
-						{ return (new Yytoken(0, "or")); }
+						{ return (new Yytoken(26, "rightparen")); }
 					case -10:
 						break;
 					case 10:
-						{ return (new Yytoken(0, "comma")); }
+						{ return (new Yytoken(27, "leftbrace")); }
 					case -11:
 						break;
 					case 11:
-						{ return (new Yytoken(0, "leftbracket")); }
+						{ return (new Yytoken(28, "rightbrace")); }
 					case -12:
 						break;
 					case 12:
-						{ return (new Yytoken(0, "intconstant")); }
+						{ return (new Yytoken(29, "leftbracket")); }
 					case -13:
 						break;
 					case 13:
-						{ return (new Yytoken(0, "minus")); }
+						{ return (new Yytoken(30, "rightbracket")); }
 					case -14:
 						break;
 					case 14:
-						{ return (new Yytoken(0, "less")); }
+						{ return (new Yytoken(40, "assignop")); }
 					case -15:
 						break;
 					case 15:
-						{ return (new Yytoken(0, "not")); }
+						{ return (new Yytoken(37, "not")); }
 					case -16:
 						break;
 					case 16:
-						{ return (new Yytoken(0, "period")); }
+						{ return (new Yytoken(35, "greater")); }
 					case -17:
 						break;
 					case 17:
-						{ return (new Yytoken(0, "rightbracket")); }
+						{ return (new Yytoken(36, "less")); }
 					case -18:
 						break;
 					case 18:
-						{ return (new Yytoken(0, "multiplication")); }
+						{ return (new Yytoken(42, "minus")); }
 					case -19:
 						break;
 					case 19:
-						{ return (new Yytoken(0, "leftparen")); }
+						{ return (new Yytoken(43, "multiplication")); }
 					case -20:
 						break;
 					case 20:
-						{ return (new Yytoken(0, "leftbrace")); }
+						{ return (new Yytoken(44, "mod")); }
 					case -21:
 						break;
 					case 21:
@@ -621,135 +645,135 @@ class Yylex {
 					case -22:
 						break;
 					case 22:
-						{ return (new Yytoken(0, "semicolon")); }
+						{ yybegin(STRING); }
 					case -23:
 						break;
 					case 23:
-						{ return (new Yytoken(0, "rightparen")); }
+						{ return (new Yytoken(46, "comma")); }
 					case -24:
 						break;
 					case 24:
-						{ return (new Yytoken(0, "rightbrace")); }
+						{ return (new Yytoken(48, "semicolon")); }
 					case -25:
 						break;
 					case 25:
-						{ yybegin(STRING); }
+						{ return (new Yytoken( 7, "if")); }
 					case -26:
 						break;
 					case 26:
-						{ return (new Yytoken(0, "if")); }
+						{ return (new Yytoken(21, "doubleconstant")); }
 					case -27:
 						break;
 					case 27:
-						{ return (new Yytoken(0, "greaterequal")); }
+						{ return (new Yytoken(31, "equal")); }
 					case -28:
 						break;
 					case 28:
-						{ return (new Yytoken(0, "equal")); }
+						{ return (new Yytoken(32, "notequal")); }
 					case -29:
 						break;
 					case 29:
-						{ return (new Yytoken(0, "doubleconstant")); }
+						{ return (new Yytoken(33, "greaterequal")); }
 					case -30:
 						break;
 					case 30:
-						{ return (new Yytoken(0, "lessequal")); }
+						{ return (new Yytoken(34, "lessequal")); }
 					case -31:
 						break;
 					case 31:
-						{ return (new Yytoken(0, "notequal")); }
+						{ return (new Yytoken(38, "and")); }
 					case -32:
 						break;
 					case 32:
-						{ return (new Yytoken(0, "and")); }
+						{ return (new Yytoken(39, "or")); }
 					case -33:
 						break;
 					case 33:
-						{ return (new Yytoken(0, "new")); }
+						{ return (new Yytoken(12, "new")); }
 					case -34:
 						break;
 					case 34:
-						{ return (new Yytoken(0, "int")); }
+						{ return (new Yytoken( 6, "for")); }
 					case -35:
 						break;
 					case 35:
-						{ return (new Yytoken(0, "for")); }
+						{ return (new Yytoken(10, "int")); }
 					case -36:
 						break;
 					case 36:
-						{ return (new Yytoken(0, "else")); }
+						{ return (new Yytoken(22, "intconstant")); }
 					case -37:
 						break;
 					case 37:
-						{ return (new Yytoken(0, "null")); }
+						{ return (new Yytoken( 4, "else")); }
 					case -38:
 						break;
 					case 38:
-						{ return (new Yytoken(0, "booleanconstant")); }
+						{ return (new Yytoken(13, "null")); }
 					case -39:
 						break;
 					case 39:
-						{ return (new Yytoken(0, "void")); }
+						{ return (new Yytoken(20, "booleanconstant")); }
 					case -40:
 						break;
 					case 40:
-						{ return (new Yytoken(0, "break")); }
+						{ return (new Yytoken(18, "void")); }
 					case -41:
 						break;
 					case 41:
-						{ return (new Yytoken(0, "while")); }
+						{ return (new Yytoken( 1, "break")); }
 					case -42:
 						break;
 					case 42:
-						{ return (new Yytoken(0, "class")); }
+						{ return (new Yytoken( 2, "class")); }
 					case -43:
 						break;
 					case 43:
-						{ return (new Yytoken(0, "string")); }
+						{ return (new Yytoken(19, "while")); }
 					case -44:
 						break;
 					case 44:
-						{ return (new Yytoken(0, "readln")); }
+						{ return (new Yytoken(15, "readln")); }
 					case -45:
 						break;
 					case 45:
-						{ return (new Yytoken(0, "return")); }
+						{ return (new Yytoken(16, "return")); }
 					case -46:
 						break;
 					case 46:
-						{ return (new Yytoken(0, "double")); }
+						{ return (new Yytoken(17, "string")); }
 					case -47:
 						break;
 					case 47:
-						{ return (new Yytoken(0, "boolean")); }
+						{ return (new Yytoken( 3, "double")); }
 					case -48:
 						break;
 					case 48:
-						{ return (new Yytoken(0, "extends")); }
+						{ return (new Yytoken( 0, "boolean")); }
 					case -49:
 						break;
 					case 49:
-						{ return (new Yytoken(0, "println")); }
+						{ return (new Yytoken( 5, "extends")); }
 					case -50:
 						break;
 					case 50:
-						{ return (new Yytoken(0, "newarray")); }
+						{ return (new Yytoken(14, "println")); }
 					case -51:
 						break;
 					case 51:
-						{ return (new Yytoken(0, "interface")); }
+						{ return (new Yytoken(11, "newarray")); }
 					case -52:
 						break;
 					case 52:
-						{ return (new Yytoken(0, "implements")); }
+						{ return (new Yytoken( 9, "interface")); }
 					case -53:
 						break;
 					case 53:
-						{ yybegin(YYINITIAL); }
+						{ return (new Yytoken( 8, "implements")); }
 					case -54:
 						break;
 					case 54:
-						{ }
+						{ yybegin(YYINITIAL); }
 					case -55:
 						break;
 					case 55:
@@ -757,356 +781,376 @@ class Yylex {
 					case -56:
 						break;
 					case 56:
-						{ yybegin(YYINITIAL); }
+						{ }
 					case -57:
 						break;
 					case 57:
-						{ yybegin(YYINITIAL); return (new Yytoken(0, "stringconstant")); }
+						{ yybegin(YYINITIAL); }
 					case -58:
 						break;
 					case 58:
-						{ yybegin(YYINITIAL); return (new Yytoken(0, "division")); }
+						{ yybegin(YYINITIAL); }
 					case -59:
 						break;
 					case 59:
-						{ yybegin(COMMENT); }
+						{ yybegin(YYINITIAL); return (new Yytoken(49, "stringconstant")); }
 					case -60:
 						break;
 					case 60:
-						{ yybegin(ONECOMMENT); }
+						{  }
 					case -61:
 						break;
-					case 62:
-						{ return (new Yytoken(0, "id")); }
+					case 61:
+						{ yybegin(YYINITIAL); return (new Yytoken(45, "division")); }
 					case -62:
 						break;
-					case 64:
-						{ return (new Yytoken(0, "id")); }
+					case 62:
+						{ yybegin(COMMENT); }
 					case -63:
 						break;
-					case 66:
-						{ return (new Yytoken(0, "id")); }
+					case 63:
+						{ yybegin(ONECOMMENT); }
 					case -64:
 						break;
-					case 68:
-						{ return (new Yytoken(0, "id")); }
+					case 65:
+						{ return (new Yytoken(24, "id")); }
 					case -65:
 						break;
-					case 70:
-						{ return (new Yytoken(0, "id")); }
+					case 66:
+						{ return (new Yytoken(23, "intconstant")); }
 					case -66:
 						break;
-					case 72:
-						{ return (new Yytoken(0, "id")); }
+					case 67:
+						{ return (new Yytoken(21, "doubleconstant")); }
 					case -67:
 						break;
-					case 74:
-						{ return (new Yytoken(0, "id")); }
+					case 69:
+						{ return (new Yytoken(24, "id")); }
 					case -68:
 						break;
-					case 75:
-						{ return (new Yytoken(0, "id")); }
+					case 71:
+						{ return (new Yytoken(24, "id")); }
 					case -69:
 						break;
-					case 76:
-						{ return (new Yytoken(0, "id")); }
+					case 73:
+						{ return (new Yytoken(24, "id")); }
 					case -70:
 						break;
-					case 77:
-						{ return (new Yytoken(0, "id")); }
+					case 75:
+						{ return (new Yytoken(24, "id")); }
 					case -71:
 						break;
-					case 78:
-						{ return (new Yytoken(0, "id")); }
+					case 77:
+						{ return (new Yytoken(24, "id")); }
 					case -72:
 						break;
 					case 79:
-						{ return (new Yytoken(0, "id")); }
+						{ return (new Yytoken(24, "id")); }
 					case -73:
 						break;
-					case 80:
-						{ return (new Yytoken(0, "id")); }
+					case 81:
+						{ return (new Yytoken(24, "id")); }
 					case -74:
 						break;
-					case 81:
-						{ return (new Yytoken(0, "id")); }
+					case 83:
+						{ return (new Yytoken(24, "id")); }
 					case -75:
 						break;
-					case 82:
-						{ return (new Yytoken(0, "id")); }
+					case 85:
+						{ return (new Yytoken(24, "id")); }
 					case -76:
 						break;
-					case 83:
-						{ return (new Yytoken(0, "id")); }
+					case 86:
+						{ return (new Yytoken(24, "id")); }
 					case -77:
 						break;
-					case 84:
-						{ return (new Yytoken(0, "id")); }
+					case 87:
+						{ return (new Yytoken(24, "id")); }
 					case -78:
 						break;
-					case 85:
-						{ return (new Yytoken(0, "id")); }
+					case 88:
+						{ return (new Yytoken(24, "id")); }
 					case -79:
 						break;
-					case 86:
-						{ return (new Yytoken(0, "id")); }
+					case 89:
+						{ return (new Yytoken(24, "id")); }
 					case -80:
 						break;
-					case 87:
-						{ return (new Yytoken(0, "id")); }
+					case 90:
+						{ return (new Yytoken(24, "id")); }
 					case -81:
 						break;
-					case 88:
-						{ return (new Yytoken(0, "id")); }
+					case 91:
+						{ return (new Yytoken(24, "id")); }
 					case -82:
 						break;
-					case 89:
-						{ return (new Yytoken(0, "id")); }
+					case 92:
+						{ return (new Yytoken(24, "id")); }
 					case -83:
 						break;
-					case 90:
-						{ return (new Yytoken(0, "id")); }
+					case 93:
+						{ return (new Yytoken(24, "id")); }
 					case -84:
 						break;
-					case 91:
-						{ return (new Yytoken(0, "id")); }
+					case 94:
+						{ return (new Yytoken(24, "id")); }
 					case -85:
 						break;
-					case 92:
-						{ return (new Yytoken(0, "id")); }
+					case 95:
+						{ return (new Yytoken(24, "id")); }
 					case -86:
 						break;
-					case 93:
-						{ return (new Yytoken(0, "id")); }
+					case 96:
+						{ return (new Yytoken(24, "id")); }
 					case -87:
 						break;
-					case 94:
-						{ return (new Yytoken(0, "id")); }
+					case 97:
+						{ return (new Yytoken(24, "id")); }
 					case -88:
 						break;
-					case 95:
-						{ return (new Yytoken(0, "id")); }
+					case 98:
+						{ return (new Yytoken(24, "id")); }
 					case -89:
 						break;
-					case 96:
-						{ return (new Yytoken(0, "id")); }
+					case 99:
+						{ return (new Yytoken(24, "id")); }
 					case -90:
 						break;
-					case 97:
-						{ return (new Yytoken(0, "id")); }
+					case 100:
+						{ return (new Yytoken(24, "id")); }
 					case -91:
 						break;
-					case 98:
-						{ return (new Yytoken(0, "id")); }
+					case 101:
+						{ return (new Yytoken(24, "id")); }
 					case -92:
 						break;
-					case 99:
-						{ return (new Yytoken(0, "id")); }
+					case 102:
+						{ return (new Yytoken(24, "id")); }
 					case -93:
 						break;
-					case 100:
-						{ return (new Yytoken(0, "id")); }
+					case 103:
+						{ return (new Yytoken(24, "id")); }
 					case -94:
 						break;
-					case 101:
-						{ return (new Yytoken(0, "id")); }
+					case 104:
+						{ return (new Yytoken(24, "id")); }
 					case -95:
 						break;
-					case 102:
-						{ return (new Yytoken(0, "id")); }
+					case 105:
+						{ return (new Yytoken(24, "id")); }
 					case -96:
 						break;
-					case 103:
-						{ return (new Yytoken(0, "id")); }
+					case 106:
+						{ return (new Yytoken(24, "id")); }
 					case -97:
 						break;
-					case 104:
-						{ return (new Yytoken(0, "id")); }
+					case 107:
+						{ return (new Yytoken(24, "id")); }
 					case -98:
 						break;
-					case 105:
-						{ return (new Yytoken(0, "id")); }
+					case 108:
+						{ return (new Yytoken(24, "id")); }
 					case -99:
 						break;
-					case 106:
-						{ return (new Yytoken(0, "id")); }
+					case 109:
+						{ return (new Yytoken(24, "id")); }
 					case -100:
 						break;
-					case 107:
-						{ return (new Yytoken(0, "id")); }
+					case 110:
+						{ return (new Yytoken(24, "id")); }
 					case -101:
 						break;
-					case 108:
-						{ return (new Yytoken(0, "id")); }
+					case 111:
+						{ return (new Yytoken(24, "id")); }
 					case -102:
 						break;
-					case 109:
-						{ return (new Yytoken(0, "id")); }
+					case 112:
+						{ return (new Yytoken(24, "id")); }
 					case -103:
 						break;
-					case 110:
-						{ return (new Yytoken(0, "id")); }
+					case 113:
+						{ return (new Yytoken(24, "id")); }
 					case -104:
 						break;
-					case 111:
-						{ return (new Yytoken(0, "id")); }
+					case 114:
+						{ return (new Yytoken(24, "id")); }
 					case -105:
 						break;
-					case 112:
-						{ return (new Yytoken(0, "id")); }
+					case 115:
+						{ return (new Yytoken(24, "id")); }
 					case -106:
 						break;
-					case 113:
-						{ return (new Yytoken(0, "id")); }
+					case 116:
+						{ return (new Yytoken(24, "id")); }
 					case -107:
 						break;
-					case 114:
-						{ return (new Yytoken(0, "id")); }
+					case 117:
+						{ return (new Yytoken(24, "id")); }
 					case -108:
 						break;
-					case 115:
-						{ return (new Yytoken(0, "id")); }
+					case 118:
+						{ return (new Yytoken(24, "id")); }
 					case -109:
 						break;
-					case 116:
-						{ return (new Yytoken(0, "id")); }
+					case 119:
+						{ return (new Yytoken(24, "id")); }
 					case -110:
 						break;
-					case 117:
-						{ return (new Yytoken(0, "id")); }
+					case 120:
+						{ return (new Yytoken(24, "id")); }
 					case -111:
 						break;
-					case 118:
-						{ return (new Yytoken(0, "id")); }
+					case 121:
+						{ return (new Yytoken(24, "id")); }
 					case -112:
 						break;
-					case 119:
-						{ return (new Yytoken(0, "id")); }
+					case 122:
+						{ return (new Yytoken(24, "id")); }
 					case -113:
 						break;
-					case 120:
-						{ return (new Yytoken(0, "id")); }
+					case 123:
+						{ return (new Yytoken(24, "id")); }
 					case -114:
 						break;
-					case 121:
-						{ return (new Yytoken(0, "id")); }
+					case 124:
+						{ return (new Yytoken(24, "id")); }
 					case -115:
 						break;
-					case 122:
-						{ return (new Yytoken(0, "id")); }
+					case 125:
+						{ return (new Yytoken(24, "id")); }
 					case -116:
 						break;
-					case 123:
-						{ return (new Yytoken(0, "id")); }
+					case 126:
+						{ return (new Yytoken(24, "id")); }
 					case -117:
 						break;
-					case 124:
-						{ return (new Yytoken(0, "id")); }
+					case 127:
+						{ return (new Yytoken(24, "id")); }
 					case -118:
 						break;
-					case 125:
-						{ return (new Yytoken(0, "id")); }
+					case 128:
+						{ return (new Yytoken(24, "id")); }
 					case -119:
 						break;
-					case 126:
-						{ return (new Yytoken(0, "id")); }
+					case 129:
+						{ return (new Yytoken(24, "id")); }
 					case -120:
 						break;
-					case 127:
-						{ return (new Yytoken(0, "id")); }
+					case 130:
+						{ return (new Yytoken(24, "id")); }
 					case -121:
 						break;
-					case 128:
-						{ return (new Yytoken(0, "id")); }
+					case 131:
+						{ return (new Yytoken(24, "id")); }
 					case -122:
 						break;
-					case 129:
-						{ return (new Yytoken(0, "id")); }
+					case 132:
+						{ return (new Yytoken(24, "id")); }
 					case -123:
 						break;
-					case 130:
-						{ return (new Yytoken(0, "id")); }
+					case 133:
+						{ return (new Yytoken(24, "id")); }
 					case -124:
 						break;
-					case 131:
-						{ return (new Yytoken(0, "id")); }
+					case 134:
+						{ return (new Yytoken(24, "id")); }
 					case -125:
 						break;
-					case 132:
-						{ return (new Yytoken(0, "id")); }
+					case 135:
+						{ return (new Yytoken(24, "id")); }
 					case -126:
 						break;
-					case 133:
-						{ return (new Yytoken(0, "id")); }
+					case 136:
+						{ return (new Yytoken(24, "id")); }
 					case -127:
 						break;
-					case 134:
-						{ return (new Yytoken(0, "id")); }
+					case 137:
+						{ return (new Yytoken(24, "id")); }
 					case -128:
 						break;
-					case 135:
-						{ return (new Yytoken(0, "id")); }
+					case 138:
+						{ return (new Yytoken(24, "id")); }
 					case -129:
 						break;
-					case 136:
-						{ return (new Yytoken(0, "id")); }
+					case 139:
+						{ return (new Yytoken(24, "id")); }
 					case -130:
 						break;
-					case 137:
-						{ return (new Yytoken(0, "id")); }
+					case 140:
+						{ return (new Yytoken(24, "id")); }
 					case -131:
 						break;
-					case 138:
-						{ return (new Yytoken(0, "id")); }
+					case 141:
+						{ return (new Yytoken(24, "id")); }
 					case -132:
 						break;
-					case 139:
-						{ return (new Yytoken(0, "id")); }
+					case 142:
+						{ return (new Yytoken(24, "id")); }
 					case -133:
 						break;
-					case 140:
-						{ return (new Yytoken(0, "id")); }
+					case 143:
+						{ return (new Yytoken(24, "id")); }
 					case -134:
 						break;
-					case 141:
-						{ return (new Yytoken(0, "id")); }
+					case 144:
+						{ return (new Yytoken(24, "id")); }
 					case -135:
 						break;
-					case 142:
-						{ return (new Yytoken(0, "id")); }
+					case 145:
+						{ return (new Yytoken(24, "id")); }
 					case -136:
 						break;
-					case 143:
-						{ return (new Yytoken(0, "id")); }
+					case 146:
+						{ return (new Yytoken(24, "id")); }
 					case -137:
 						break;
-					case 144:
-						{ return (new Yytoken(0, "id")); }
+					case 147:
+						{ return (new Yytoken(24, "id")); }
 					case -138:
 						break;
-					case 145:
-						{ return (new Yytoken(0, "id")); }
+					case 148:
+						{ return (new Yytoken(24, "id")); }
 					case -139:
 						break;
-					case 146:
-						{ return (new Yytoken(0, "id")); }
+					case 149:
+						{ return (new Yytoken(24, "id")); }
 					case -140:
 						break;
-					case 147:
-						{ return (new Yytoken(0, "id")); }
+					case 150:
+						{ return (new Yytoken(24, "id")); }
 					case -141:
 						break;
-					case 148:
-						{ return (new Yytoken(0, "id")); }
+					case 151:
+						{ return (new Yytoken(24, "id")); }
 					case -142:
 						break;
-					case 149:
-						{ return (new Yytoken(0, "id")); }
+					case 152:
+						{ return (new Yytoken(24, "id")); }
 					case -143:
 						break;
-					case 150:
-						{ return (new Yytoken(0, "id")); }
+					case 153:
+						{ return (new Yytoken(24, "id")); }
 					case -144:
+						break;
+					case 154:
+						{ return (new Yytoken(24, "id")); }
+					case -145:
+						break;
+					case 155:
+						{ return (new Yytoken(24, "id")); }
+					case -146:
+						break;
+					case 156:
+						{ return (new Yytoken(24, "id")); }
+					case -147:
+						break;
+					case 157:
+						{ return (new Yytoken(24, "id")); }
+					case -148:
+						break;
+					case 158:
+						{ return (new Yytoken(24, "id")); }
+					case -149:
 						break;
 					default:
 						yy_error(YY_E_INTERNAL,false);
