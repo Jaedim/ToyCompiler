@@ -14,13 +14,32 @@
 *   -
 *********/
 
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+
 class Toy {
+    private int tokenCounter = 0; // Used for keyword / identifier seperators
+
     public static void main(String args[]) throws java.io.IOException {
         // Enable debugging output or not (default: false)
         Info.debugMode = true;
 
-        Yylex yy = new Yylex(System.in);
+        Scanner keywords = new Scanner(new File("./toy.keywords"));
+        FileReader inputCode = new FileReader(new File("./toy.code"));
+        FileWriter outputFile = new FileWriter(new File("./output.txt"));
+        Trie trieTable = new Trie();
+
+        Yylex yy = new Yylex(inputCode);
         Yytoken t;
+
+        while (keywords.hasNextLine()) {
+            trieTable.setIdentifier(keywords.nextLine());
+            trieTable.storeIntoTrie();
+        }
+
+        trieTable.printTable();
         
         while ((t = yy.yylex()) != null) {
             System.out.print(t);
@@ -44,6 +63,247 @@ class Info {
         if (e == Error.UNCLOSED_STRING) {
             System.out.println("UNCLOSED_STRING_ERROR");
         }
+    }
+}
+
+// Trie data structure
+class Trie {
+    private int switchArr[] =  new int[52]; // A-Z & a-z
+    private char symbolArr[] = new char[200]; // Arbitrary value for now
+    private int nextArr[] =    new int[200]; // Arbitrary value for now
+    private int lastPos = 0; // Position of first empty spot in next/symbol arrays
+
+    private String identifier;
+    private int currSymIndex;
+    private int ptr;
+    private int seperator;
+
+    public Trie() {
+        resetId();
+        ptr = 0;
+        seperator = 0;
+        
+        for (int i = 0; i < switchArr.length; i++)
+            switchArr[i] = -1;
+
+        for (int i = 0; i < symbolArr.length; i++)
+            symbolArr[i] = 0;
+
+        for (int i = 0; i < nextArr.length; i++)
+            nextArr[i] = -1;
+    }
+
+    public void setIdentifier(String id) {
+        identifier = id;
+        currSymIndex = 0;
+    }
+
+    // Stores given identifier into symbol table
+    // NOTE: setIdentifier() must be used first
+    public void storeIntoTrie() {
+        if (identifier.length() == 0) return;
+
+        int valueOfSymbol = getNextSymbol();
+        int ptr = switchArr[valueOfSymbol];
+        
+        if (ptr == -1) {
+            create();
+        }
+        else {
+            valueOfSymbol = getNextSymbol();
+            boolean exit = false;
+            while (!exit) {
+                if (symbolArr[ptr] == valueOfSymbol) {
+                    if (currSymIndex != identifier.length()) {
+                        ptr += 1;
+                        valueOfSymbol = getNextSymbol();
+                        currSymIndex++;
+                    }
+                    else {
+                        exit = true;
+                    }
+                }
+                else {
+                    if (nextArr[ptr] != -1) {
+                        ptr = nextArr[ptr];
+                        valueOfSymbol = getNextSymbol();
+                    }
+                    else {
+                        create();
+                        exit = true;
+                    }
+                }
+            }
+        }
+
+        resetId();
+    }
+
+/*
+valueOfSymbol = getNextSymbol();  // get first symbol in id
+ptr = switch [valueOfSymbol];     // set pointer to point at symbol location in switch array
+if ptr is undefined then Create() // new identifier if symbol does not exist in switch array
+else {                            // else (if it points to something)
+    valueOfSymbol = getNextSymbol();    // get next symbol in id
+    exit = false;                       // exit flag used for characters flagged as end points
+    while not exit {                    // while not at an exit point...
+        if (symbol [ptr] == valueOfSymbol)          // if symbol at position ptr is same as symbol in id
+        then if valueOfSymbol is not the endmarker      // check if symbol in id is endmarker
+            then { ptr = ptr + 1;                       // if not, increment pointer by one
+                valueOfSymbol = getNextSymbol(); }      // get next symbol in id
+            else { exit = true; }       // if symbol is endmarker, set exit flag to true
+        else if next [ptr] is defined   // see if next array contains a pointer
+            then ptr = next [ptr]       // set pointer to point to next set in symbol array
+            else { Create(); exit = true; } // new identifier (pointer added to next array)
+    } //while
+} //if
+*/
+    // Returns symbol "value" (according to switch array)
+    private int getNextSymbol() {
+        if (currSymIndex > identifier.length()) return -1;
+
+        char c = identifier.charAt(currSymIndex);
+
+        int offset = 0;
+        if (c >= 'a' && c <= 'z')
+            offset = 26;
+
+        offset -= Character.getNumericValue('a'); // A and a have the same value
+
+        return Character.getNumericValue(c) + offset;
+    }
+
+    private void create() {
+        int firstChPos = Character.getNumericValue(identifier.charAt(0));
+        firstChPos -= Character.getNumericValue('a');
+        
+        if (identifier.charAt(0) >= 'a' && identifier.charAt(0) <= 'z')
+            firstChPos += 26;
+        
+        int storeLength = 0;
+
+        if (switchArr[firstChPos] == -1) {
+            switchArr[firstChPos] = lastPos;
+            ptr = switchArr[firstChPos];
+            lastPos += identifier.length() - 1;
+            storeLength = lastPos - ptr;
+        }
+        else {
+            ptr = switchArr[firstChPos];
+            while (nextArr[ptr] != -1) ptr = nextArr[ptr];
+            nextArr[ptr] = lastPos;
+            ptr = nextArr[ptr];
+            lastPos += identifier.length() - 1 - currSymIndex;
+            storeLength = lastPos - ptr;
+            System.out.println("id: " + identifier);
+            System.out.println("ptr|lastPos|sl: " + ptr + "|" + lastPos + "|" + storeLength);
+        }
+
+        for (int i = 0 + currSymIndex; i < storeLength; i++)
+            symbolArr[i + ptr] = identifier.charAt(i + 1);
+
+        //symbolArr[lastPos] = (char) seperator;
+        symbolArr[lastPos] = '@';
+        lastPos++;
+    }
+
+    public void printTable() {
+        int maxWidth = 68;
+        printSwitchTable(maxWidth);
+        System.out.println();
+        printRestOfTable(maxWidth);
+        System.out.println();
+    }
+
+    private void printSwitchTable(int maxWidth) {
+        String printTop = "";
+        String printBot = "";
+
+        for (int i = 0; i < switchArr.length; i++) {
+            int spacePadBot = (String.valueOf(switchArr[i])).length();
+            int spacing = Math.max(spacePadBot, 2); // 2 = minimum spacing
+            String topAddChar = "";
+            String botAddChar = "";
+
+            if (printTop.equals("")) { // printTop & printBot are empty by this conditional
+                printTop = "        ";
+                printBot = "switch: ";
+            }
+
+            if (i < 26) topAddChar += (char)('A' + i);
+            else        topAddChar += (char)('a' + i - 26);
+
+            botAddChar = String.valueOf(switchArr[i]);
+
+            printTop += insertSpacing(topAddChar, spacing) + " ";
+            printBot += insertSpacing(botAddChar, spacing) + " ";
+
+            // Due to padding, all print* variables should be the same length
+            if (printTop.length() >= maxWidth || i == switchArr.length - 1) {
+                System.out.println(printTop);
+                System.out.println(printBot);
+                System.out.println();
+                printTop = printBot = "";
+            }
+        }
+    }
+
+    private void printRestOfTable(int maxWidth) {
+            String printTop = "";
+            String printMid = "";
+            String printBot = "";
+        for (int i = 0; i < symbolArr.length; i++) {
+            if (printTop.equals("")) { // All print* are empty by this conditional
+                printTop = "        ";
+                printMid = "symbol: ";
+                printBot = "next:   ";
+            }
+        
+            int spacePadTop = (String.valueOf(i)).length();
+            int spacePadBot = (String.valueOf(nextArr[i])).length();
+            int spacing = Math.max(spacePadTop, spacePadBot);
+            spacing = Math.max(2, spacing); // 2 = minimum spacing
+            
+            String topAddChar = "";
+            String midAddChar = "";
+            String botAddChar = "";
+
+            topAddChar = String.valueOf(i);
+            midAddChar = String.valueOf(symbolArr[i]);
+            if (nextArr[i] != -1) botAddChar = String.valueOf(nextArr[i]);
+
+            printTop += insertSpacing(topAddChar, spacing) + " ";
+            printMid += insertSpacing(midAddChar, spacing) + " ";
+            printBot += insertSpacing(botAddChar, spacing) + " ";
+
+            if (printTop.length() >= maxWidth || i == symbolArr.length - 1 || symbolArr[i + 1] == 0) {
+                System.out.println(printTop);
+                System.out.println(printMid);
+                System.out.println(printBot);
+                System.out.println();
+
+                printTop = printMid = printBot = "";
+
+                if (symbolArr[i + 1] == 0) break;
+            }
+        }
+    }
+
+    private String insertSpacing(String str, int amount) {
+        for (int i = str.length(); i < amount; i++) {
+            str = " " + str;
+        }
+
+        return str;
+    }
+
+    public void incrementSeperator() {
+        seperator++;
+    }
+
+    private void resetId() {
+        identifier = "";
+        currSymIndex = 0;
     }
 }
 
