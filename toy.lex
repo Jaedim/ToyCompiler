@@ -1,6 +1,3 @@
-// NOTE TO SELF:
-//   -ADD LOGIC TO PRODUCE SYMBOL TABLE
-
 /********
 * Notes:
 *   -States below should be organized to their respective sections:
@@ -31,25 +28,32 @@ class Toy {
 
         Yylex yy = new Yylex(inputCode);
         Yytoken t;
+        String output = "";
 
         while (keywords.hasNextLine()) {
             trieTable.setIdentifier(keywords.nextLine());
             trieTable.storeIntoTrie();
         }
-
-        trieTable.printTable();
         
         while ((t = yy.yylex()) != null) {
-            System.out.print(t);
+            output += t;
+
+            if (t.getType().equals("id")) {
+                trieTable.setIdentifier(t.getText());
+                trieTable.storeIntoTrie();
+            }
         }
+
+        trieTable.printTable();
+        System.out.println(output);
     }
 }
 
 // Trie data structure
 class Trie {
     private int switchArr[] =  new int[52]; // A-Z & a-z
-    private char symbolArr[] = new char[200]; // Arbitrary value for now
-    private int nextArr[] =    new int[200]; // Arbitrary value for now
+    private char symbolArr[] = new char[2000]; // Arbitrary value for now
+    private int nextArr[] =    new int[2000]; // Arbitrary value for now
     private int lastPos = 0; // Position of first empty spot in next/symbol arrays
 
     private String identifier;
@@ -91,6 +95,9 @@ class Trie {
             insertIdentifier(); // insert full symbol into table, and
             return; // exit after inserting full symbol into table
         }
+        else if (identifier.length() == 1) {
+            return;
+        }
 
         currSymIndex++;
         valueOfSymbol = getNextSymbolVal();
@@ -98,9 +105,10 @@ class Trie {
             char c = symbolArr[ptr];
             int symbolArrVal = Character.getNumericValue(c);
             if (c >= 'a' && c <= 'z') symbolArrVal += 26 - 10;
+            else                      symbolArrVal -= 10;
 
             if (symbolArrVal == valueOfSymbol) { // if same char
-                if (currSymIndex < identifier.length()) {
+                if (currSymIndex < identifier.length()-1) {
                     ptr++;
                     currSymIndex++;
                     valueOfSymbol = getNextSymbolVal();
@@ -128,6 +136,7 @@ class Trie {
         int out = Character.getNumericValue(c);
 
         if (c >= 'a' && c <= 'z') out += 26 - 10;
+        else                      out -= 10;
 
         return out;
     }
@@ -252,11 +261,13 @@ class Trie {
 // Handles the token generation as stated below in the subroutines.
 class Yytoken {
     private int index;
+    private String text;
     private String type;
     
     // The constructor used for most subroutines.
-    public Yytoken(int index, String type) {
+    public Yytoken(int index, String text, String type) {
         this.index = index;
+        this.text = text;
         this.type = type;
     }
 
@@ -267,12 +278,20 @@ class Yytoken {
         this.type = "newline";
     }
     
-    // Used for outputting information for 
+    // Used for outputting information
     public String toString() {    
         if (type.equals("newline"))
             return "\n";
 
         return type + " ";
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getText() {
+        return text;
     }
 }
 
@@ -296,63 +315,63 @@ NEWLINE=[\n\012]
 <YYINITIAL> {NEWLINE} { return (new Yytoken()); }
 <YYINITIAL> {WHITE_SPACE_CHAR} { }
 
-<YYINITIAL> "boolean"                                  { return (new Yytoken( 0, "boolean")); }
-<YYINITIAL> "break"                                    { return (new Yytoken( 1, "break")); }
-<YYINITIAL> "class"                                    { return (new Yytoken( 2, "class")); }
-<YYINITIAL> "double"                                   { return (new Yytoken( 3, "double")); }
-<YYINITIAL> "else"                                     { return (new Yytoken( 4, "else")); }
-<YYINITIAL> "extends"                                  { return (new Yytoken( 5, "extends")); }
-<YYINITIAL> "for"                                      { return (new Yytoken( 6, "for")); }
-<YYINITIAL> "if"                                       { return (new Yytoken( 7, "if")); }
-<YYINITIAL> "implements"                               { return (new Yytoken( 8, "implements")); }
-<YYINITIAL> "interface"                                { return (new Yytoken( 9, "interface")); }
-<YYINITIAL> "int"                                      { return (new Yytoken(10, "int")); }
-<YYINITIAL> "newarray"                                 { return (new Yytoken(11, "newarray")); }
-<YYINITIAL> "new"                                      { return (new Yytoken(12, "new")); }
-<YYINITIAL> "null"                                     { return (new Yytoken(13, "null")); }
-<YYINITIAL> "println"                                  { return (new Yytoken(14, "println")); }
-<YYINITIAL> "readln"                                   { return (new Yytoken(15, "readln")); }
-<YYINITIAL> "return"                                   { return (new Yytoken(16, "return")); }
-<YYINITIAL> "string"                                   { return (new Yytoken(17, "string")); }
-<YYINITIAL> "void"                                     { return (new Yytoken(18, "void")); }
-<YYINITIAL> "while"                                    { return (new Yytoken(19, "while")); }
-<YYINITIAL> ("true"|"false")                           { return (new Yytoken(20, "booleanconstant")); }
-<YYINITIAL> {DIGIT}+"."{DIGIT}*(("E+"|"e+"){DIGIT}+)?  { return (new Yytoken(21, "doubleconstant")); }
-<YYINITIAL> "0x"{HEX}+|"0X"{HEX}+                      { return (new Yytoken(22, "intconstant")); }
-<YYINITIAL> {DIGIT}+                                   { return (new Yytoken(23, "intconstant")); }
-<YYINITIAL> {ALPHA}({ALPHA}|{DIGIT}|_)*                { return (new Yytoken(24, "id")); }
+<YYINITIAL> "boolean"                                  { return (new Yytoken( 0, yytext(), "boolean")); }
+<YYINITIAL> "break"                                    { return (new Yytoken( 1, yytext(), "break")); }
+<YYINITIAL> "class"                                    { return (new Yytoken( 2, yytext(), "class")); }
+<YYINITIAL> "double"                                   { return (new Yytoken( 3, yytext(), "double")); }
+<YYINITIAL> "else"                                     { return (new Yytoken( 4, yytext(), "else")); }
+<YYINITIAL> "extends"                                  { return (new Yytoken( 5, yytext(), "extends")); }
+<YYINITIAL> "for"                                      { return (new Yytoken( 6, yytext(), "for")); }
+<YYINITIAL> "if"                                       { return (new Yytoken( 7, yytext(), "if")); }
+<YYINITIAL> "implements"                               { return (new Yytoken( 8, yytext(), "implements")); }
+<YYINITIAL> "interface"                                { return (new Yytoken( 9, yytext(), "interface")); }
+<YYINITIAL> "int"                                      { return (new Yytoken(10, yytext(), "int")); }
+<YYINITIAL> "newarray"                                 { return (new Yytoken(11, yytext(), "newarray")); }
+<YYINITIAL> "new"                                      { return (new Yytoken(12, yytext(), "new")); }
+<YYINITIAL> "null"                                     { return (new Yytoken(13, yytext(), "null")); }
+<YYINITIAL> "println"                                  { return (new Yytoken(14, yytext(), "println")); }
+<YYINITIAL> "readln"                                   { return (new Yytoken(15, yytext(), "readln")); }
+<YYINITIAL> "return"                                   { return (new Yytoken(16, yytext(), "return")); }
+<YYINITIAL> "string"                                   { return (new Yytoken(17, yytext(), "string")); }
+<YYINITIAL> "void"                                     { return (new Yytoken(18, yytext(), "void")); }
+<YYINITIAL> "while"                                    { return (new Yytoken(19, yytext(), "while")); }
+<YYINITIAL> ("true"|"false")                           { return (new Yytoken(20, yytext(), "booleanconstant")); }
+<YYINITIAL> {DIGIT}+"."{DIGIT}*(("E+"|"e+"){DIGIT}+)?  { return (new Yytoken(21, yytext(), "doubleconstant")); }
+<YYINITIAL> "0x"{HEX}+|"0X"{HEX}+                      { return (new Yytoken(22, yytext(), "intconstant")); }
+<YYINITIAL> {DIGIT}+                                   { return (new Yytoken(23, yytext(), "intconstant")); }
+<YYINITIAL> {ALPHA}({ALPHA}|{DIGIT}|_)*                { return (new Yytoken(24, yytext(), "id")); }
 
-<YYINITIAL> "("                                        { return (new Yytoken(25, "leftparen")); }
-<YYINITIAL> ")"                                        { return (new Yytoken(26, "rightparen")); }
-<YYINITIAL> "{"                                        { return (new Yytoken(27, "leftbrace")); }
-<YYINITIAL> "}"                                        { return (new Yytoken(28, "rightbrace")); }
-<YYINITIAL> "["                                        { return (new Yytoken(29, "leftbracket")); }
-<YYINITIAL> "]"                                        { return (new Yytoken(30, "rightbracket")); }
+<YYINITIAL> "("                                        { return (new Yytoken(25, yytext(), "leftparen")); }
+<YYINITIAL> ")"                                        { return (new Yytoken(26, yytext(), "rightparen")); }
+<YYINITIAL> "{"                                        { return (new Yytoken(27, yytext(), "leftbrace")); }
+<YYINITIAL> "}"                                        { return (new Yytoken(28, yytext(), "rightbrace")); }
+<YYINITIAL> "["                                        { return (new Yytoken(29, yytext(), "leftbracket")); }
+<YYINITIAL> "]"                                        { return (new Yytoken(30, yytext(), "rightbracket")); }
 
-<YYINITIAL> "=="                                       { return (new Yytoken(31, "equal")); }
-<YYINITIAL> "!="                                       { return (new Yytoken(32, "notequal")); }
-<YYINITIAL> ">="                                       { return (new Yytoken(33, "greaterequal")); }
-<YYINITIAL> "<="                                       { return (new Yytoken(34, "lessequal")); }
-<YYINITIAL> ">"                                        { return (new Yytoken(35, "greater")); }
-<YYINITIAL> "<"                                        { return (new Yytoken(36, "less")); }
-<YYINITIAL> "!"                                        { return (new Yytoken(37, "not")); }
-<YYINITIAL> "&&"                                       { return (new Yytoken(38, "and")); }
-<YYINITIAL> "||"                                       { return (new Yytoken(39, "or")); }
+<YYINITIAL> "=="                                       { return (new Yytoken(31, yytext(), "equal")); }
+<YYINITIAL> "!="                                       { return (new Yytoken(32, yytext(), "notequal")); }
+<YYINITIAL> ">="                                       { return (new Yytoken(33, yytext(), "greaterequal")); }
+<YYINITIAL> "<="                                       { return (new Yytoken(34, yytext(), "lessequal")); }
+<YYINITIAL> ">"                                        { return (new Yytoken(35, yytext(), "greater")); }
+<YYINITIAL> "<"                                        { return (new Yytoken(36, yytext(), "less")); }
+<YYINITIAL> "!"                                        { return (new Yytoken(37, yytext(), "not")); }
+<YYINITIAL> "&&"                                       { return (new Yytoken(38, yytext(), "and")); }
+<YYINITIAL> "||"                                       { return (new Yytoken(39, yytext(), "or")); }
 
-<YYINITIAL> "="                                        { return (new Yytoken(40, "assignop")); }
-<YYINITIAL> "+"                                        { return (new Yytoken(41, "plus")); }
-<YYINITIAL> "-"                                        { return (new Yytoken(42, "minus")); }
-<YYINITIAL> "*"                                        { return (new Yytoken(43, "multiplication")); }
-<YYINITIAL> "%"                                        { return (new Yytoken(44, "mod")); }
+<YYINITIAL> "="                                        { return (new Yytoken(40, yytext(), "assignop")); }
+<YYINITIAL> "+"                                        { return (new Yytoken(41, yytext(), "plus")); }
+<YYINITIAL> "-"                                        { return (new Yytoken(42, yytext(), "minus")); }
+<YYINITIAL> "*"                                        { return (new Yytoken(43, yytext(), "multiplication")); }
+<YYINITIAL> "%"                                        { return (new Yytoken(44, yytext(), "mod")); }
 <YYINITIAL> "/"                                        { yybegin(FSLASH); }
 <YYINITIAL> \"                                         { yybegin(STRING); }
 
-<YYINITIAL> ","                                        { return (new Yytoken(46, "comma")); }
-<YYINITIAL> "."                                        { return (new Yytoken(47, "period")); }
-<YYINITIAL> ";"                                        { return (new Yytoken(48, "semicolon")); }
+<YYINITIAL> ","                                        { return (new Yytoken(46, yytext(), "comma")); }
+<YYINITIAL> "."                                        { return (new Yytoken(47, yytext(), "period")); }
+<YYINITIAL> ";"                                        { return (new Yytoken(48, yytext(), "semicolon")); }
 
 
-<FSLASH> ([^("*"|"/")])     { yybegin(YYINITIAL); return (new Yytoken(45, "division")); }
+<FSLASH> ([^("*"|"/")])     { yybegin(YYINITIAL); return (new Yytoken(45, yytext(), "division")); }
 <FSLASH> "/"                { yybegin(ONECOMMENT); }
 <FSLASH> "*"                { yybegin(COMMENT); }
 
@@ -365,6 +384,6 @@ NEWLINE=[\n\012]
 <COMMENT> "*/"              { yybegin(YYINITIAL); }
 
 
-<STRING> [\n\"]         { yybegin(YYINITIAL); return (new Yytoken(49, "stringconstant")); }
-<STRING> [^(\"|\n)]     {  }
-<STRING> \n             { yybegin(YYINITIAL); System.out.println(""); }
+<STRING> [\n\"]             { yybegin(YYINITIAL); return (new Yytoken(49, yytext(), "stringconstant")); }
+<STRING> [^(\"|\n)]         {  }
+<STRING> \n                 { yybegin(YYINITIAL); System.out.println("UNMATCHED_STRING"); }

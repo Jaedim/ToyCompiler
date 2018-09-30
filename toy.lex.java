@@ -19,47 +19,33 @@ import java.io.FileWriter;
 class Toy {
     private int tokenCounter = 0; // Used for keyword / identifier seperators
     public static void main(String args[]) throws java.io.IOException {
-        // Enable debugging output or not (default: false)
-        Info.setDebugMode(true);
         Scanner keywords = new Scanner(new File("./toy.keywords"));
         FileReader inputCode = new FileReader(new File("./toy.code"));
         FileWriter outputFile = new FileWriter(new File("./output.txt"));
         Trie trieTable = new Trie();
         Yylex yy = new Yylex(inputCode);
         Yytoken t;
+        String output = "";
         while (keywords.hasNextLine()) {
             trieTable.setIdentifier(keywords.nextLine());
             trieTable.storeIntoTrie();
         }
-        trieTable.printTable();
         while ((t = yy.yylex()) != null) {
-            System.out.print(t);
+            output += t;
+            if (t.getType().equals("id")) {
+                trieTable.setIdentifier(t.getText());
+                trieTable.storeIntoTrie();
+            }
         }
-    }
-}
-// Used only to print debugging info or lexical errors in the input code.
-// This information will not be passed to the semantic parser.
-// To disable info output, set "debugMode" to false at start of main method.
-class Info {
-    private static boolean debugMode = false;
-    public enum Error {
-        UNCLOSED_STRING
-    };
-    public void throwError(Error e) {
-        if (!debugMode) return;
-        if (e == Error.UNCLOSED_STRING) {
-            System.out.println("UNCLOSED_STRING_ERROR");
-        }
-    }
-    public static void setDebugMode(boolean b) {
-        debugMode = b;
+        trieTable.printTable();
+        System.out.println(output);
     }
 }
 // Trie data structure
 class Trie {
     private int switchArr[] =  new int[52]; // A-Z & a-z
-    private char symbolArr[] = new char[200]; // Arbitrary value for now
-    private int nextArr[] =    new int[200]; // Arbitrary value for now
+    private char symbolArr[] = new char[2000]; // Arbitrary value for now
+    private int nextArr[] =    new int[2000]; // Arbitrary value for now
     private int lastPos = 0; // Position of first empty spot in next/symbol arrays
     private String identifier;
     private int valueOfSymbol;
@@ -93,14 +79,18 @@ class Trie {
             insertIdentifier(); // insert full symbol into table, and
             return; // exit after inserting full symbol into table
         }
+        else if (identifier.length() == 1) {
+            return;
+        }
         currSymIndex++;
         valueOfSymbol = getNextSymbolVal();
         while (!exit) { // Partial symbol handling
             char c = symbolArr[ptr];
             int symbolArrVal = Character.getNumericValue(c);
             if (c >= 'a' && c <= 'z') symbolArrVal += 26 - 10;
+            else                      symbolArrVal -= 10;
             if (symbolArrVal == valueOfSymbol) { // if same char
-                if (currSymIndex < identifier.length()) {
+                if (currSymIndex < identifier.length()-1) {
                     ptr++;
                     currSymIndex++;
                     valueOfSymbol = getNextSymbolVal();
@@ -125,6 +115,7 @@ class Trie {
         char c = identifier.charAt(currSymIndex);
         int out = Character.getNumericValue(c);
         if (c >= 'a' && c <= 'z') out += 26 - 10;
+        else                      out -= 10;
         return out;
     }
     private void insertIdentifier() {
@@ -224,10 +215,12 @@ class Trie {
 // Handles the token generation as stated below in the subroutines.
 class Yytoken {
     private int index;
+    private String text;
     private String type;
     // The constructor used for most subroutines.
-    public Yytoken(int index, String type) {
+    public Yytoken(int index, String text, String type) {
         this.index = index;
+        this.text = text;
         this.type = type;
     }
     // Default constructor that's used to generate newlines in the
@@ -236,11 +229,17 @@ class Yytoken {
         this.index = -1;
         this.type = "newline";
     }
-    // Used for outputting information for 
+    // Used for outputting information
     public String toString() {    
         if (type.equals("newline"))
             return "\n";
         return type + " ";
+    }
+    public String getType() {
+        return type;
+    }
+    public String getText() {
+        return text;
     }
 }
 
@@ -755,71 +754,71 @@ class Yylex {
 					case -4:
 						break;
 					case 4:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -5:
 						break;
 					case 5:
-						{ return (new Yytoken(23, "intconstant")); }
+						{ return (new Yytoken(23, yytext(), "intconstant")); }
 					case -6:
 						break;
 					case 6:
-						{ return (new Yytoken(47, "period")); }
+						{ return (new Yytoken(47, yytext(), "period")); }
 					case -7:
 						break;
 					case 7:
-						{ return (new Yytoken(41, "plus")); }
+						{ return (new Yytoken(41, yytext(), "plus")); }
 					case -8:
 						break;
 					case 8:
-						{ return (new Yytoken(25, "leftparen")); }
+						{ return (new Yytoken(25, yytext(), "leftparen")); }
 					case -9:
 						break;
 					case 9:
-						{ return (new Yytoken(26, "rightparen")); }
+						{ return (new Yytoken(26, yytext(), "rightparen")); }
 					case -10:
 						break;
 					case 10:
-						{ return (new Yytoken(27, "leftbrace")); }
+						{ return (new Yytoken(27, yytext(), "leftbrace")); }
 					case -11:
 						break;
 					case 11:
-						{ return (new Yytoken(28, "rightbrace")); }
+						{ return (new Yytoken(28, yytext(), "rightbrace")); }
 					case -12:
 						break;
 					case 12:
-						{ return (new Yytoken(29, "leftbracket")); }
+						{ return (new Yytoken(29, yytext(), "leftbracket")); }
 					case -13:
 						break;
 					case 13:
-						{ return (new Yytoken(30, "rightbracket")); }
+						{ return (new Yytoken(30, yytext(), "rightbracket")); }
 					case -14:
 						break;
 					case 14:
-						{ return (new Yytoken(40, "assignop")); }
+						{ return (new Yytoken(40, yytext(), "assignop")); }
 					case -15:
 						break;
 					case 15:
-						{ return (new Yytoken(37, "not")); }
+						{ return (new Yytoken(37, yytext(), "not")); }
 					case -16:
 						break;
 					case 16:
-						{ return (new Yytoken(35, "greater")); }
+						{ return (new Yytoken(35, yytext(), "greater")); }
 					case -17:
 						break;
 					case 17:
-						{ return (new Yytoken(36, "less")); }
+						{ return (new Yytoken(36, yytext(), "less")); }
 					case -18:
 						break;
 					case 18:
-						{ return (new Yytoken(42, "minus")); }
+						{ return (new Yytoken(42, yytext(), "minus")); }
 					case -19:
 						break;
 					case 19:
-						{ return (new Yytoken(43, "multiplication")); }
+						{ return (new Yytoken(43, yytext(), "multiplication")); }
 					case -20:
 						break;
 					case 20:
-						{ return (new Yytoken(44, "mod")); }
+						{ return (new Yytoken(44, yytext(), "mod")); }
 					case -21:
 						break;
 					case 21:
@@ -831,127 +830,127 @@ class Yylex {
 					case -23:
 						break;
 					case 23:
-						{ return (new Yytoken(46, "comma")); }
+						{ return (new Yytoken(46, yytext(), "comma")); }
 					case -24:
 						break;
 					case 24:
-						{ return (new Yytoken(48, "semicolon")); }
+						{ return (new Yytoken(48, yytext(), "semicolon")); }
 					case -25:
 						break;
 					case 25:
-						{ return (new Yytoken( 7, "if")); }
+						{ return (new Yytoken( 7, yytext(), "if")); }
 					case -26:
 						break;
 					case 26:
-						{ return (new Yytoken(21, "doubleconstant")); }
+						{ return (new Yytoken(21, yytext(), "doubleconstant")); }
 					case -27:
 						break;
 					case 27:
-						{ return (new Yytoken(31, "equal")); }
+						{ return (new Yytoken(31, yytext(), "equal")); }
 					case -28:
 						break;
 					case 28:
-						{ return (new Yytoken(32, "notequal")); }
+						{ return (new Yytoken(32, yytext(), "notequal")); }
 					case -29:
 						break;
 					case 29:
-						{ return (new Yytoken(33, "greaterequal")); }
+						{ return (new Yytoken(33, yytext(), "greaterequal")); }
 					case -30:
 						break;
 					case 30:
-						{ return (new Yytoken(34, "lessequal")); }
+						{ return (new Yytoken(34, yytext(), "lessequal")); }
 					case -31:
 						break;
 					case 31:
-						{ return (new Yytoken(38, "and")); }
+						{ return (new Yytoken(38, yytext(), "and")); }
 					case -32:
 						break;
 					case 32:
-						{ return (new Yytoken(39, "or")); }
+						{ return (new Yytoken(39, yytext(), "or")); }
 					case -33:
 						break;
 					case 33:
-						{ return (new Yytoken(12, "new")); }
+						{ return (new Yytoken(12, yytext(), "new")); }
 					case -34:
 						break;
 					case 34:
-						{ return (new Yytoken( 6, "for")); }
+						{ return (new Yytoken( 6, yytext(), "for")); }
 					case -35:
 						break;
 					case 35:
-						{ return (new Yytoken(10, "int")); }
+						{ return (new Yytoken(10, yytext(), "int")); }
 					case -36:
 						break;
 					case 36:
-						{ return (new Yytoken(22, "intconstant")); }
+						{ return (new Yytoken(22, yytext(), "intconstant")); }
 					case -37:
 						break;
 					case 37:
-						{ return (new Yytoken( 4, "else")); }
+						{ return (new Yytoken( 4, yytext(), "else")); }
 					case -38:
 						break;
 					case 38:
-						{ return (new Yytoken(13, "null")); }
+						{ return (new Yytoken(13, yytext(), "null")); }
 					case -39:
 						break;
 					case 39:
-						{ return (new Yytoken(20, "booleanconstant")); }
+						{ return (new Yytoken(20, yytext(), "booleanconstant")); }
 					case -40:
 						break;
 					case 40:
-						{ return (new Yytoken(18, "void")); }
+						{ return (new Yytoken(18, yytext(), "void")); }
 					case -41:
 						break;
 					case 41:
-						{ return (new Yytoken( 1, "break")); }
+						{ return (new Yytoken( 1, yytext(), "break")); }
 					case -42:
 						break;
 					case 42:
-						{ return (new Yytoken( 2, "class")); }
+						{ return (new Yytoken( 2, yytext(), "class")); }
 					case -43:
 						break;
 					case 43:
-						{ return (new Yytoken(19, "while")); }
+						{ return (new Yytoken(19, yytext(), "while")); }
 					case -44:
 						break;
 					case 44:
-						{ return (new Yytoken(15, "readln")); }
+						{ return (new Yytoken(15, yytext(), "readln")); }
 					case -45:
 						break;
 					case 45:
-						{ return (new Yytoken(16, "return")); }
+						{ return (new Yytoken(16, yytext(), "return")); }
 					case -46:
 						break;
 					case 46:
-						{ return (new Yytoken(17, "string")); }
+						{ return (new Yytoken(17, yytext(), "string")); }
 					case -47:
 						break;
 					case 47:
-						{ return (new Yytoken( 3, "double")); }
+						{ return (new Yytoken( 3, yytext(), "double")); }
 					case -48:
 						break;
 					case 48:
-						{ return (new Yytoken( 0, "boolean")); }
+						{ return (new Yytoken( 0, yytext(), "boolean")); }
 					case -49:
 						break;
 					case 49:
-						{ return (new Yytoken( 5, "extends")); }
+						{ return (new Yytoken( 5, yytext(), "extends")); }
 					case -50:
 						break;
 					case 50:
-						{ return (new Yytoken(14, "println")); }
+						{ return (new Yytoken(14, yytext(), "println")); }
 					case -51:
 						break;
 					case 51:
-						{ return (new Yytoken(11, "newarray")); }
+						{ return (new Yytoken(11, yytext(), "newarray")); }
 					case -52:
 						break;
 					case 52:
-						{ return (new Yytoken( 9, "interface")); }
+						{ return (new Yytoken( 9, yytext(), "interface")); }
 					case -53:
 						break;
 					case 53:
-						{ return (new Yytoken( 8, "implements")); }
+						{ return (new Yytoken( 8, yytext(), "implements")); }
 					case -54:
 						break;
 					case 54:
@@ -975,7 +974,7 @@ class Yylex {
 					case -59:
 						break;
 					case 59:
-						{ yybegin(YYINITIAL); return (new Yytoken(49, "stringconstant")); }
+						{ yybegin(YYINITIAL); return (new Yytoken(49, yytext(), "stringconstant")); }
 					case -60:
 						break;
 					case 60:
@@ -983,7 +982,7 @@ class Yylex {
 					case -61:
 						break;
 					case 61:
-						{ yybegin(YYINITIAL); return (new Yytoken(45, "division")); }
+						{ yybegin(YYINITIAL); return (new Yytoken(45, yytext(), "division")); }
 					case -62:
 						break;
 					case 62:
@@ -995,343 +994,343 @@ class Yylex {
 					case -64:
 						break;
 					case 65:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -65:
 						break;
 					case 66:
-						{ return (new Yytoken(23, "intconstant")); }
+						{ return (new Yytoken(23, yytext(), "intconstant")); }
 					case -66:
 						break;
 					case 67:
-						{ return (new Yytoken(21, "doubleconstant")); }
+						{ return (new Yytoken(21, yytext(), "doubleconstant")); }
 					case -67:
 						break;
 					case 69:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -68:
 						break;
 					case 71:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -69:
 						break;
 					case 73:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -70:
 						break;
 					case 75:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -71:
 						break;
 					case 77:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -72:
 						break;
 					case 79:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -73:
 						break;
 					case 81:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -74:
 						break;
 					case 83:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -75:
 						break;
 					case 85:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -76:
 						break;
 					case 86:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -77:
 						break;
 					case 87:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -78:
 						break;
 					case 88:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -79:
 						break;
 					case 89:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -80:
 						break;
 					case 90:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -81:
 						break;
 					case 91:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -82:
 						break;
 					case 92:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -83:
 						break;
 					case 93:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -84:
 						break;
 					case 94:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -85:
 						break;
 					case 95:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -86:
 						break;
 					case 96:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -87:
 						break;
 					case 97:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -88:
 						break;
 					case 98:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -89:
 						break;
 					case 99:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -90:
 						break;
 					case 100:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -91:
 						break;
 					case 101:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -92:
 						break;
 					case 102:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -93:
 						break;
 					case 103:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -94:
 						break;
 					case 104:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -95:
 						break;
 					case 105:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -96:
 						break;
 					case 106:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -97:
 						break;
 					case 107:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -98:
 						break;
 					case 108:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -99:
 						break;
 					case 109:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -100:
 						break;
 					case 110:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -101:
 						break;
 					case 111:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -102:
 						break;
 					case 112:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -103:
 						break;
 					case 113:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -104:
 						break;
 					case 114:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -105:
 						break;
 					case 115:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -106:
 						break;
 					case 116:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -107:
 						break;
 					case 117:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -108:
 						break;
 					case 118:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -109:
 						break;
 					case 119:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -110:
 						break;
 					case 120:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -111:
 						break;
 					case 121:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -112:
 						break;
 					case 122:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -113:
 						break;
 					case 123:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -114:
 						break;
 					case 124:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -115:
 						break;
 					case 125:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -116:
 						break;
 					case 126:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -117:
 						break;
 					case 127:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -118:
 						break;
 					case 128:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -119:
 						break;
 					case 129:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -120:
 						break;
 					case 130:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -121:
 						break;
 					case 131:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -122:
 						break;
 					case 132:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -123:
 						break;
 					case 133:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -124:
 						break;
 					case 134:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -125:
 						break;
 					case 135:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -126:
 						break;
 					case 136:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -127:
 						break;
 					case 137:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -128:
 						break;
 					case 138:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -129:
 						break;
 					case 139:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -130:
 						break;
 					case 140:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -131:
 						break;
 					case 141:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -132:
 						break;
 					case 142:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -133:
 						break;
 					case 143:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -134:
 						break;
 					case 144:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -135:
 						break;
 					case 145:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -136:
 						break;
 					case 146:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -137:
 						break;
 					case 147:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -138:
 						break;
 					case 148:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -139:
 						break;
 					case 149:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -140:
 						break;
 					case 150:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -141:
 						break;
 					case 151:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -142:
 						break;
 					case 152:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -143:
 						break;
 					case 153:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -144:
 						break;
 					case 154:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -145:
 						break;
 					case 155:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -146:
 						break;
 					case 156:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -147:
 						break;
 					case 157:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -148:
 						break;
 					case 158:
-						{ return (new Yytoken(24, "id")); }
+						{ return (new Yytoken(24, yytext(), "id")); }
 					case -149:
 						break;
 					default:
