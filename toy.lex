@@ -8,7 +8,6 @@
 *       -Miscellaneous
 *   -Keyword states should be organized alphabetically to ensure that
 *       keywords with similar characters at the start are not predisposed
-*   -
 *********/
 
 import java.util.Scanner;
@@ -20,10 +19,27 @@ class Toy {
     private int tokenCounter = 0; // Used for keyword / identifier seperators
 
     public static void main(String args[]) throws java.io.IOException {
+        
+        String keywords_file = "";
+        String code_file = "";
 
-        Scanner keywords = new Scanner(new File("./toy.keywords"));
-        FileReader inputCode = new FileReader(new File("./toy.code"));
-        FileWriter outputFile = new FileWriter(new File("./output.txt"));
+        if (args.length != 2) {
+            System.out.println();
+            System.out.println("Keyword file and code file must be specified as arguments in this order:");
+            System.out.println("\t<keywords_file> <code_file>");
+            return; // Exit if args is not 2 (required)
+        }
+        else {
+            if (args[0].charAt(0) != '/') keywords_file = "./" + args[0]; // relative
+            else                          keywords_file = args[0]; // absolute path
+
+            if (args[1].charAt(0) != '/') code_file = "./" + args[1]; // relative
+            else                          code_file = args[1]; // absolute path
+        }
+
+        Scanner keywords = new Scanner(new File(keywords_file));
+        FileReader inputCode = new FileReader(new File(code_file));
+        FileWriter outputFile = new FileWriter(new File(code_file + ".output"));
         Trie trieTable = new Trie();
 
         Yylex yy = new Yylex(inputCode);
@@ -45,7 +61,12 @@ class Toy {
         }
 
         trieTable.printTable();
+        trieTable.printTable(outputFile);
+        
         System.out.println(output);
+        outputFile.write(output);
+        outputFile.flush(); // Write fully to file
+        outputFile.close();
     }
 }
 
@@ -62,11 +83,15 @@ class Trie {
     private int ptr;
     private int seperator;
 
+    int maxWidth; // Maximum output width allowed (default 68 to match example)
+
     public Trie() {
         ptr = 0;
         seperator = 0;
         lastPos = 0;
         valueOfSymbol = 0;
+
+        maxWidth = 68;
         
         for (int i = 0; i < switchArr.length; i++)
             switchArr[i] = -1;
@@ -162,15 +187,27 @@ class Trie {
         lastPos += 1;
     }
 
-    public void printTable() {
-        int maxWidth = 68;
-        printSwitchTable(maxWidth);
+    public void setOutputWidth(int width) {
+        maxWidth = width;
+    }
+
+    public void printTable() throws java.io.IOException {
+        printSwitchTable(maxWidth, null);
         System.out.println();
-        printRestOfTable(maxWidth);
+        printRestOfTable(maxWidth, null);
         System.out.println();
     }
 
-    private void printSwitchTable(int maxWidth) {
+    public void printTable(FileWriter outFile) throws java.io.IOException {
+        printSwitchTable(maxWidth, outFile);
+        outFile.write("\n");
+        printRestOfTable(maxWidth, outFile);
+        outFile.write("\n");
+        outFile.flush();
+    }
+
+    private void printSwitchTable(int maxWidth, FileWriter file)
+                 throws java.io.IOException {
         String printTop = "";
         String printBot = "";
 
@@ -195,15 +232,22 @@ class Trie {
 
             // Due to padding, all print* variables should be the same length
             if (printTop.length() >= maxWidth || i == switchArr.length - 1) {
-                System.out.println(printTop);
-                System.out.println(printBot);
-                System.out.println();
+                if (file == null) {
+                    System.out.println(printTop);
+                    System.out.println(printBot);
+                    System.out.println();
+                }
+                else {
+                    file.write(printTop + "\n");
+                    file.write(printBot + "\n");
+                    file.write("\n");
+                }
                 printTop = printBot = "";
             }
         }
     }
 
-    private void printRestOfTable(int maxWidth) {
+    private void printRestOfTable(int maxWidth, FileWriter file) throws java.io.IOException {
             String printTop = "";
             String printMid = "";
             String printBot = "";
@@ -232,10 +276,18 @@ class Trie {
             printBot += insertSpacing(botAddChar, spacing) + " ";
 
             if (printTop.length() >= maxWidth || i == symbolArr.length - 1 || symbolArr[i + 1] == 0) {
-                System.out.println(printTop);
-                System.out.println(printMid);
-                System.out.println(printBot);
-                System.out.println();
+                if (file == null) {
+                    System.out.println(printTop);
+                    System.out.println(printMid);
+                    System.out.println(printBot);
+                    System.out.println();
+                }
+                else {
+                    file.write(printTop + "\n");
+                    file.write(printMid + "\n");
+                    file.write(printBot + "\n");
+                    file.write("\n");
+                }
 
                 printTop = printMid = printBot = "";
 
