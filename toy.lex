@@ -23,8 +23,6 @@ class Toy {
     private int tokenCounter = 0; // Used for keyword / identifier seperators
 
     public static void main(String args[]) throws java.io.IOException {
-        // Enable debugging output or not (default: false)
-        Info.debugMode = true;
 
         Scanner keywords = new Scanner(new File("./toy.keywords"));
         FileReader inputCode = new FileReader(new File("./toy.code"));
@@ -47,25 +45,6 @@ class Toy {
     }
 }
 
-// Used only to print debugging info or lexical errors in the input code.
-// This information will not be passed to the semantic parser.
-// To disable info output, set "debugMode" to false at start of main method.
-class Info {
-    public static boolean debugMode = false;
-
-    public enum Error {
-        UNCLOSED_STRING
-    };
-
-    public void throwError(Error e) {
-        if (!debugMode) return;
-
-        if (e == Error.UNCLOSED_STRING) {
-            System.out.println("UNCLOSED_STRING_ERROR");
-        }
-    }
-}
-
 // Trie data structure
 class Trie {
     private int switchArr[] =  new int[52]; // A-Z & a-z
@@ -74,14 +53,16 @@ class Trie {
     private int lastPos = 0; // Position of first empty spot in next/symbol arrays
 
     private String identifier;
+    private int valueOfSymbol;
     private int currSymIndex;
     private int ptr;
     private int seperator;
 
     public Trie() {
-        resetId();
         ptr = 0;
         seperator = 0;
+        lastPos = 0;
+        valueOfSymbol = 0;
         
         for (int i = 0; i < switchArr.length; i++)
             switchArr[i] = -1;
@@ -101,7 +82,75 @@ class Trie {
     // Stores given identifier into symbol table
     // NOTE: setIdentifier() must be used first
     public void storeIntoTrie() {
+        valueOfSymbol = getNextSymbolVal();
+        boolean exit = false;
+        ptr = switchArr[valueOfSymbol];
         
+        if (ptr == -1) { // If symbol does not yet exist in table:
+            currSymIndex++; // Consume first symbol,
+            insertIdentifier(); // insert full symbol into table, and
+            return; // exit after inserting full symbol into table
+        }
+
+        currSymIndex++;
+        valueOfSymbol = getNextSymbolVal();
+        while (!exit) { // Partial symbol handling
+            char c = symbolArr[ptr];
+            int symbolArrVal = Character.getNumericValue(c);
+            if (c >= 'a' && c <= 'z') symbolArrVal += 26 - 10;
+
+            if (symbolArrVal == valueOfSymbol) { // if same char
+                if (currSymIndex < identifier.length()) {
+                    ptr++;
+                    currSymIndex++;
+                    valueOfSymbol = getNextSymbolVal();
+                }
+                else { // Reached end, symbol is already in table
+                    exit = true;
+                }
+            }
+            else { // if not same char
+                if (nextArr[ptr] != -1) {
+                    ptr = nextArr[ptr]; // If capable jump, go to it
+                }
+                else { // Insert partial symbol into table if no jump is possible
+                    insertIdentifier();
+                    exit = true;
+                }
+            }
+        }
+    }
+
+    private int getNextSymbolVal() {
+        if (identifier.length() == 0) return -1;
+
+        char c = identifier.charAt(currSymIndex);
+        int out = Character.getNumericValue(c);
+
+        if (c >= 'a' && c <= 'z') out += 26 - 10;
+
+        return out;
+    }
+
+    private void insertIdentifier() {
+        // If does not exist in switch array
+        if (ptr == -1) { // full symbol insertion
+            switchArr[valueOfSymbol] = lastPos;
+            ptr = switchArr[valueOfSymbol];
+        }
+        else { // partial symbol insertion
+            nextArr[ptr] = lastPos;
+            ptr = nextArr[ptr];
+        }
+
+        int idLen = identifier.length() - currSymIndex;
+        lastPos += idLen;
+
+        for (int i = 0; i < idLen; i++)
+            symbolArr[ptr + i] = identifier.charAt(currSymIndex + i);
+
+        symbolArr[lastPos] = '@';
+        lastPos += 1;
     }
 
     public void printTable() {
@@ -196,11 +245,6 @@ class Trie {
 
     public void incrementSeperator() {
         seperator++;
-    }
-
-    private void resetId() {
-        identifier = "";
-        currSymIndex = 0;
     }
 }
 
@@ -323,7 +367,4 @@ NEWLINE=[\n\012]
 
 <STRING> [\n\"]         { yybegin(YYINITIAL); return (new Yytoken(49, "stringconstant")); }
 <STRING> [^(\"|\n)]     {  }
-<STRING> \n             { 
-                          yybegin(YYINITIAL); System.out.println(""); 
-                          new Info().throwError(Info.Error.UNCLOSED_STRING);
-                        }
+<STRING> \n             { yybegin(YYINITIAL); System.out.println(""); }
