@@ -10,6 +10,11 @@
 *       keywords with similar characters at the start are not predisposed
 *********/
 
+/**
+* Member names:
+* Min-Jae Yi
+**/
+
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileReader;
