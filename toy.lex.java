@@ -1006,7 +1006,7 @@ class Yylex {
 					case -54:
 						break;
 					case 54:
-						{ yybegin(YYINITIAL); }
+						{ yybegin(YYINITIAL); return (new Yytoken()); }
 					case -55:
 						break;
 					case 55:

@@ -437,7 +437,7 @@ NEWLINE=[\n\012]
 
 
 <ONECOMMENT> [^(\n\012)]    { }
-<ONECOMMENT> {NEWLINE}      { yybegin(YYINITIAL); }
+<ONECOMMENT> {NEWLINE}      { yybegin(YYINITIAL); return (new Yytoken()); }
 
 <COMMENT> [^"*/"]           { }
 <COMMENT> "*/"[\n\012]      { yybegin(YYINITIAL); }
