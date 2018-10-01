@@ -19,54 +19,62 @@ class Toy {
     private int tokenCounter = 0; // Used for keyword / identifier seperators
 
     public static void main(String args[]) throws java.io.IOException {
-        
-        String keywords_file = "";
-        String code_file = "";
 
-        if (args.length != 2) {
-            System.out.println();
-            System.out.println("Keyword file and code file must be specified as arguments in this order:");
-            System.out.println("\t<keywords_file> <code_file>");
-            return; // Exit if args is not 2 (required)
-        }
-        else {
+        if (args.length == 2) {
+            String keywords_file = "";
+            String code_file = "";
+            
             if (args[0].charAt(0) != '/') keywords_file = "./" + args[0]; // relative
             else                          keywords_file = args[0]; // absolute path
 
             if (args[1].charAt(0) != '/') code_file = "./" + args[1]; // relative
             else                          code_file = args[1]; // absolute path
-        }
 
-        Scanner keywords = new Scanner(new File(keywords_file));
-        FileReader inputCode = new FileReader(new File(code_file));
-        FileWriter outputFile = new FileWriter(new File(code_file + ".output"));
-        Trie trieTable = new Trie();
+            Scanner keywords = new Scanner(new File(keywords_file));
+            FileReader inputCode = new FileReader(new File(code_file));
+            FileWriter outputFile = new FileWriter(new File(code_file + ".output"));
+            Trie trieTable = new Trie();
 
-        Yylex yy = new Yylex(inputCode);
-        Yytoken t;
-        String output = "";
+            Yylex yy = new Yylex(inputCode);
+            Yytoken t;
+            String output = "";
 
-        while (keywords.hasNextLine()) {
-            trieTable.setIdentifier(keywords.nextLine());
-            trieTable.storeIntoTrie();
-        }
-        
-        while ((t = yy.yylex()) != null) {
-            output += t;
-
-            if (t.getType().equals("id")) {
-                trieTable.setIdentifier(t.getText());
+            while (keywords.hasNextLine()) {
+                trieTable.setIdentifier(keywords.nextLine());
                 trieTable.storeIntoTrie();
             }
-        }
+            
+            while ((t = yy.yylex()) != null) {
+                output += t;
 
-        trieTable.printTable();
-        trieTable.printTable(outputFile);
-        
-        System.out.println(output);
-        outputFile.write(output);
-        outputFile.flush(); // Write fully to file
-        outputFile.close();
+                if (t.getType().equals("id")) {
+                    trieTable.setIdentifier(t.getText());
+                    trieTable.storeIntoTrie();
+                }
+            }
+
+            trieTable.printTable();
+            trieTable.printTable(outputFile);
+            
+            System.out.println(output);
+            outputFile.write(output);
+            outputFile.flush(); // Write fully to file
+            outputFile.close();
+        }
+        else if (args.length == 0) { 
+            Yylex yy = new Yylex(System.in);
+            Yytoken t;
+
+            while ((t = yy.yylex()) != null)
+                System.out.println(t);
+        }
+        else {
+            System.out.println("Exactly 0 or 2 arguments are required.");
+            System.out.println("If 2 arguments are given, they must be a keyword file and a code file.");
+            System.out.println("Keyword file and code file must be specified as arguments in this order:");
+            System.out.println("\t<keywords_file> <code_file>");
+            return; // Exit if args is not 2 (required)
+        }
     }
 }
 
