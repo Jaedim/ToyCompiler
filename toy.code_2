@@ -1,0 +1,91 @@
+class ToyCodeClass {
+	void main() {
+		Planet earth = new Planet();
+		Planet mars = new Planet();
+		Planet other = new Planet();
+		earth.setProperties(123.123e+20, 023432.234, 3); // Temp value
+		mars.setProperties(100.3E+19, 019242.,04); // Another temporary value
+		other.setProperties(00023.9, 12.1E+-3, 0x2af2); // Negative exponent, so very tiny
+		
+		while (earth.getName() == "") {
+			println("Set name for planet ", earth.getID(), ":");
+			earth.setName(readln());
+		}
+		while (mars.getName() == "") {
+			println("Set name for planet ", mars.getID(), ":");
+			mars.setName(readln());
+		}
+		while (other.getName() == "") {
+			println("Set name for planet ", other.getID(), ":");
+			other.setName(readln());
+		}
+		
+		/*
+		We do some measurements for yadda yadda reasons
+		*/
+		double measurement1 = earth.getRadius();
+		double measurement2 = mars.getRadius();
+		for (int i = 0; i <= 5; i = i + 1) {
+			if (other.getMass >= 20) break;
+			if (earth.getMass() <= 1.E+10) break;
+			if (mars.getMass() < 1.e+9) break;
+		
+			if (measurement1 != measurement2) {
+				measurement1 = measurement1 / other.getRadius();
+				measruement2 = measurement2 / other.getRadius();
+			}
+			else {
+				measurement1 = measurement1 / other.getRadius();
+				measurement2 = measurement1;
+			}
+		}
+		
+		// Store into array for organization
+		Planet [] planets = newarray(3, Planet);
+		planets[0] = earth;
+		planets[1] = mars;
+		planets[2] = other;
+	}
+}
+
+/* This is a generic class */
+class SpaceObject {
+	double radius = 0.0;
+	double mass = 0.0;
+	int id = 0;
+}
+
+class Planet extends SpaceObject  {
+/* Class that borrows values from SpaceObject with required properties:
+	-radius is the size
+	-mass is the amount of stuff the planet has
+	-id is the number that the planet is labelled
+*/
+	string name = "";
+	
+	void setProperties(double newRad, double newMass, int idNum) {
+		radius = newRad;
+		mass = newMass;
+		id = idNum;
+	}
+	
+	void setName(string newName) {
+		name = newName;
+	}
+	
+	string getName() {
+		return name;
+	}
+	
+	double getRadius() {
+		return radius;
+	}
+	
+	double getMass() {
+		return mass;
+	}
+	
+	double getID() {
+		return idNum;
+	}
+}
