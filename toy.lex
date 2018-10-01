@@ -375,60 +375,60 @@ NEWLINE=[\n\012]
 <YYINITIAL> {NEWLINE} { return (new Yytoken()); }
 <YYINITIAL> {WHITE_SPACE_CHAR} { }
 
-<YYINITIAL> "boolean"                                  { return (new Yytoken( 0, yytext(), "boolean")); }
-<YYINITIAL> "break"                                    { return (new Yytoken( 1, yytext(), "break")); }
-<YYINITIAL> "class"                                    { return (new Yytoken( 2, yytext(), "class")); }
-<YYINITIAL> "double"                                   { return (new Yytoken( 3, yytext(), "double")); }
-<YYINITIAL> "else"                                     { return (new Yytoken( 4, yytext(), "else")); }
-<YYINITIAL> "extends"                                  { return (new Yytoken( 5, yytext(), "extends")); }
-<YYINITIAL> "for"                                      { return (new Yytoken( 6, yytext(), "for")); }
-<YYINITIAL> "if"                                       { return (new Yytoken( 7, yytext(), "if")); }
-<YYINITIAL> "implements"                               { return (new Yytoken( 8, yytext(), "implements")); }
-<YYINITIAL> "interface"                                { return (new Yytoken( 9, yytext(), "interface")); }
-<YYINITIAL> "int"                                      { return (new Yytoken(10, yytext(), "int")); }
-<YYINITIAL> "newarray"                                 { return (new Yytoken(11, yytext(), "newarray")); }
-<YYINITIAL> "new"                                      { return (new Yytoken(12, yytext(), "new")); }
-<YYINITIAL> "null"                                     { return (new Yytoken(13, yytext(), "null")); }
-<YYINITIAL> "println"                                  { return (new Yytoken(14, yytext(), "println")); }
-<YYINITIAL> "readln"                                   { return (new Yytoken(15, yytext(), "readln")); }
-<YYINITIAL> "return"                                   { return (new Yytoken(16, yytext(), "return")); }
-<YYINITIAL> "string"                                   { return (new Yytoken(17, yytext(), "string")); }
-<YYINITIAL> "void"                                     { return (new Yytoken(18, yytext(), "void")); }
-<YYINITIAL> "while"                                    { return (new Yytoken(19, yytext(), "while")); }
-<YYINITIAL> ("true"|"false")                           { return (new Yytoken(20, yytext(), "booleanconstant")); }
-<YYINITIAL> {DIGIT}+"."{DIGIT}*(("E+"|"e+"){DIGIT}+)?  { return (new Yytoken(21, yytext(), "doubleconstant")); }
-<YYINITIAL> "0x"{HEX}+|"0X"{HEX}+                      { return (new Yytoken(22, yytext(), "intconstant")); }
-<YYINITIAL> {DIGIT}+                                   { return (new Yytoken(23, yytext(), "intconstant")); }
-<YYINITIAL> {ALPHA}({ALPHA}|{DIGIT}|_)*                { return (new Yytoken(24, yytext(), "id")); }
+<YYINITIAL> "boolean"                                        { return (new Yytoken( 0, yytext(), "boolean")); }
+<YYINITIAL> "break"                                          { return (new Yytoken( 1, yytext(), "break")); }
+<YYINITIAL> "class"                                          { return (new Yytoken( 2, yytext(), "class")); }
+<YYINITIAL> "double"                                         { return (new Yytoken( 3, yytext(), "double")); }
+<YYINITIAL> "else"                                           { return (new Yytoken( 4, yytext(), "else")); }
+<YYINITIAL> "extends"                                        { return (new Yytoken( 5, yytext(), "extends")); }
+<YYINITIAL> "for"                                            { return (new Yytoken( 6, yytext(), "for")); }
+<YYINITIAL> "if"                                             { return (new Yytoken( 7, yytext(), "if")); }
+<YYINITIAL> "implements"                                     { return (new Yytoken( 8, yytext(), "implements")); }
+<YYINITIAL> "interface"                                      { return (new Yytoken( 9, yytext(), "interface")); }
+<YYINITIAL> "int"                                            { return (new Yytoken(10, yytext(), "int")); }
+<YYINITIAL> "newarray"                                       { return (new Yytoken(11, yytext(), "newarray")); }
+<YYINITIAL> "new"                                            { return (new Yytoken(12, yytext(), "new")); }
+<YYINITIAL> "null"                                           { return (new Yytoken(13, yytext(), "null")); }
+<YYINITIAL> "println"                                        { return (new Yytoken(14, yytext(), "println")); }
+<YYINITIAL> "readln"                                         { return (new Yytoken(15, yytext(), "readln")); }
+<YYINITIAL> "return"                                         { return (new Yytoken(16, yytext(), "return")); }
+<YYINITIAL> "string"                                         { return (new Yytoken(17, yytext(), "string")); }
+<YYINITIAL> "void"                                           { return (new Yytoken(18, yytext(), "void")); }
+<YYINITIAL> "while"                                          { return (new Yytoken(19, yytext(), "while")); }
+<YYINITIAL> ("true"|"false")                                 { return (new Yytoken(20, yytext(), "booleanconstant")); }
+<YYINITIAL> {DIGIT}+"."{DIGIT}*(("E+"|"e+")("-")?{DIGIT}+)?  { return (new Yytoken(21, yytext(), "doubleconstant")); }
+<YYINITIAL> "0x"{HEX}+|"0X"{HEX}+                            { return (new Yytoken(22, yytext(), "intconstant")); }
+<YYINITIAL> {DIGIT}+                                         { return (new Yytoken(23, yytext(), "intconstant")); }
+<YYINITIAL> {ALPHA}({ALPHA}|{DIGIT}|_)*                      { return (new Yytoken(24, yytext(), "id")); }
 
-<YYINITIAL> "("                                        { return (new Yytoken(25, yytext(), "leftparen")); }
-<YYINITIAL> ")"                                        { return (new Yytoken(26, yytext(), "rightparen")); }
-<YYINITIAL> "{"                                        { return (new Yytoken(27, yytext(), "leftbrace")); }
-<YYINITIAL> "}"                                        { return (new Yytoken(28, yytext(), "rightbrace")); }
-<YYINITIAL> "["                                        { return (new Yytoken(29, yytext(), "leftbracket")); }
-<YYINITIAL> "]"                                        { return (new Yytoken(30, yytext(), "rightbracket")); }
+<YYINITIAL> "("                                              { return (new Yytoken(25, yytext(), "leftparen")); }
+<YYINITIAL> ")"                                              { return (new Yytoken(26, yytext(), "rightparen")); }
+<YYINITIAL> "{"                                              { return (new Yytoken(27, yytext(), "leftbrace")); }
+<YYINITIAL> "}"                                              { return (new Yytoken(28, yytext(), "rightbrace")); }
+<YYINITIAL> "["                                              { return (new Yytoken(29, yytext(), "leftbracket")); }
+<YYINITIAL> "]"                                              { return (new Yytoken(30, yytext(), "rightbracket")); }
 
-<YYINITIAL> "=="                                       { return (new Yytoken(31, yytext(), "equal")); }
-<YYINITIAL> "!="                                       { return (new Yytoken(32, yytext(), "notequal")); }
-<YYINITIAL> ">="                                       { return (new Yytoken(33, yytext(), "greaterequal")); }
-<YYINITIAL> "<="                                       { return (new Yytoken(34, yytext(), "lessequal")); }
-<YYINITIAL> ">"                                        { return (new Yytoken(35, yytext(), "greater")); }
-<YYINITIAL> "<"                                        { return (new Yytoken(36, yytext(), "less")); }
-<YYINITIAL> "!"                                        { return (new Yytoken(37, yytext(), "not")); }
-<YYINITIAL> "&&"                                       { return (new Yytoken(38, yytext(), "and")); }
-<YYINITIAL> "||"                                       { return (new Yytoken(39, yytext(), "or")); }
+<YYINITIAL> "=="                                             { return (new Yytoken(31, yytext(), "equal")); }
+<YYINITIAL> "!="                                             { return (new Yytoken(32, yytext(), "notequal")); }
+<YYINITIAL> ">="                                             { return (new Yytoken(33, yytext(), "greaterequal")); }
+<YYINITIAL> "<="                                             { return (new Yytoken(34, yytext(), "lessequal")); }
+<YYINITIAL> ">"                                              { return (new Yytoken(35, yytext(), "greater")); }
+<YYINITIAL> "<"                                              { return (new Yytoken(36, yytext(), "less")); }
+<YYINITIAL> "!"                                              { return (new Yytoken(37, yytext(), "not")); }
+<YYINITIAL> "&&"                                             { return (new Yytoken(38, yytext(), "and")); }
+<YYINITIAL> "||"                                             { return (new Yytoken(39, yytext(), "or")); }
 
-<YYINITIAL> "="                                        { return (new Yytoken(40, yytext(), "assignop")); }
-<YYINITIAL> "+"                                        { return (new Yytoken(41, yytext(), "plus")); }
-<YYINITIAL> "-"                                        { return (new Yytoken(42, yytext(), "minus")); }
-<YYINITIAL> "*"                                        { return (new Yytoken(43, yytext(), "multiplication")); }
-<YYINITIAL> "%"                                        { return (new Yytoken(44, yytext(), "mod")); }
-<YYINITIAL> "/"                                        { yybegin(FSLASH); }
-<YYINITIAL> \"                                         { yybegin(STRING); }
+<YYINITIAL> "="                                              { return (new Yytoken(40, yytext(), "assignop")); }
+<YYINITIAL> "+"                                              { return (new Yytoken(41, yytext(), "plus")); }
+<YYINITIAL> "-"                                              { return (new Yytoken(42, yytext(), "minus")); }
+<YYINITIAL> "*"                                              { return (new Yytoken(43, yytext(), "multiplication")); }
+<YYINITIAL> "%"                                              { return (new Yytoken(44, yytext(), "mod")); }
+<YYINITIAL> "/"                                              { yybegin(FSLASH); }
+<YYINITIAL> \"                                               { yybegin(STRING); }
 
-<YYINITIAL> ","                                        { return (new Yytoken(46, yytext(), "comma")); }
-<YYINITIAL> "."                                        { return (new Yytoken(47, yytext(), "period")); }
-<YYINITIAL> ";"                                        { return (new Yytoken(48, yytext(), "semicolon")); }
+<YYINITIAL> ","                                              { return (new Yytoken(46, yytext(), "comma")); }
+<YYINITIAL> "."                                              { return (new Yytoken(47, yytext(), "period")); }
+<YYINITIAL> ";"                                              { return (new Yytoken(48, yytext(), "semicolon")); }
 
 
 <FSLASH> ([^("*"|"/")])     { yybegin(YYINITIAL); return (new Yytoken(45, yytext(), "division")); }
