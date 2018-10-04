@@ -8,18 +8,34 @@
 *       -Miscellaneous
 *   -Keyword states should be organized alphabetically to ensure that
 *       keywords with similar characters at the start are not predisposed
+*   -Does not yet save string literals anywhere yet (just simply consumes
+*       them and returns the entire string as a single token)
 *********/
 
-/**
+/*
 * Member names:
 * Min-Jae Yi
-**/
+* Kenneth Ung
+* Dongri Zhu
+*/
 
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
+/**
+* Main class used to receive command line input and start the whole
+* lexical analyzer program.
+*
+* The program either takes 0 or 2 arguments.
+*   -If 0, the program will simply take in lines of Toy-like code and return
+*       back its tokens in string form immediately following user pressing enter.
+*   -If 2, the program will require them be in the order of $KEYWORD_FILE and then
+*       $CODE_FILE. It will then echo all $CODE_FILE input as tokens in string
+*       form and print out the trie table for it. All of this output is also stored
+*       into an output file named $CODE_FILE + ".output".
+**/
 class Toy {
     private int tokenCounter = 0; // Used for keyword / identifier seperators
 
@@ -83,7 +99,14 @@ class Toy {
     }
 }
 
-// Trie data structure
+/**
+* Class used for everything involving the trie data structure. It can create one
+* and print out its information upon request.
+* 
+* NOTE:
+* The method used is transcribed from pseudocode and follows that logic. Due to
+* that, the way some things are accomplished may be needlessly complicated.
+**/
 class Trie {
     private int switchArr[] =  new int[52]; // A-Z & a-z
     private char symbolArr[] = new char[2000]; // Arbitrary value for now
@@ -98,6 +121,10 @@ class Trie {
 
     int maxWidth; // Maximum output width allowed (default 68 to match example)
 
+    /**
+    * Default constructor of 0 arguments. Always used for initializing the
+    * member variables with proper initial values.
+    **/
     public Trie() {
         ptr = 0;
         seperator = 0;
@@ -116,13 +143,20 @@ class Trie {
             nextArr[i] = -1;
     }
 
+    /**
+    * Resets identifier state and sets target identifier to work with.
+    * @param id Identifier to add to trie.
+    **/
     public void setIdentifier(String id) {
         identifier = id;
         currSymIndex = 0;
     }
 
-    // Stores given identifier into symbol table
-    // NOTE: setIdentifier() must be used first
+    /**
+    * Stores the identifier into the trie, so long as there is a target
+    * identifier to work with. That means setIdentifier() is required to
+    * be called first.
+    **/
     public void storeIntoTrie() {
         valueOfSymbol = getNextSymbolVal();
         boolean exit = false;
@@ -167,6 +201,10 @@ class Trie {
         }
     }
 
+    /**
+    * Retrieves the next symbol from the identifier. Relies on currSymIndex,
+    * so that must be incremented externally within this class.
+    **/
     private int getNextSymbolVal() {
         if (identifier.length() == 0) return -1;
 
@@ -179,6 +217,10 @@ class Trie {
         return out;
     }
 
+    /**
+    * Inserts the identifier into the trie, starting from the position that
+    * currSymIndex indicates and ending at the end of the identifier.
+    **/
     private void insertIdentifier() {
         // If does not exist in switch array
         if (ptr == -1) { // full symbol insertion
@@ -200,10 +242,20 @@ class Trie {
         lastPos += 1;
     }
 
+    /**
+    * Sets the output width that is allowed. Should the trie table exceed
+    * this width, it will be forced to continue to print to another line.
+    * Default width is 68 characters.
+    * @param width Width to force table to
+    **/
     public void setOutputWidth(int width) {
         maxWidth = width;
     }
 
+    /**
+    * Prints the table, starting with the switch table and then the symbol
+    * table and next table together.
+    **/
     public void printTable() throws java.io.IOException {
         printSwitchTable(maxWidth, null);
         System.out.println();
@@ -211,6 +263,10 @@ class Trie {
         System.out.println();
     }
 
+    /**
+    * Prints the table to the output file, starting with the switch table and
+    * then the symbol table and next table together.
+    **/
     public void printTable(FileWriter outFile) throws java.io.IOException {
         printSwitchTable(maxWidth, outFile);
         outFile.write("\n");
@@ -219,6 +275,12 @@ class Trie {
         outFile.flush();
     }
 
+    /**
+    * Handles printing just the switch table so the printTable() method isn't
+    * too crowded or long.
+    * @param maxWidth Maximimum width the table cannot exceed
+    * @param file File to print to (can be null for none)
+    **/
     private void printSwitchTable(int maxWidth, FileWriter file)
                  throws java.io.IOException {
         String printTop = "";
@@ -259,7 +321,13 @@ class Trie {
             }
         }
     }
-
+    
+    /**
+    * Handles printing the symbol and next tableso the printTable() method
+    * isn't too crowded or long.
+    * @param maxWidth Maximum width the table cannot exceed
+    * @param file File to print to (can be null for none)
+    **/
     private void printRestOfTable(int maxWidth, FileWriter file) throws java.io.IOException {
             String printTop = "";
             String printMid = "";
@@ -309,16 +377,15 @@ class Trie {
         }
     }
 
+    /**
+    * Returns white space according to the parameters given.
+    **/
     private String insertSpacing(String str, int amount) {
         for (int i = str.length(); i < amount; i++) {
             str = " " + str;
         }
 
         return str;
-    }
-
-    public void incrementSeperator() {
-        seperator++;
     }
 }
 
@@ -343,7 +410,7 @@ class Yytoken {
         this.type = "newline";
     }
     
-    // Used for outputting information
+    // Returns token type as a string that is printable
     public String toString() {    
         if (type.equals("newline"))
             return "\n";
@@ -351,10 +418,12 @@ class Yytoken {
         return type + " ";
     }
 
+    // Returns token type as a string
     public String getType() {
         return type;
     }
 
+    // Returns interpreted text exactly as is
     public String getText() {
         return text;
     }
