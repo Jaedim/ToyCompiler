@@ -20,6 +20,7 @@
 */
 
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -108,39 +109,30 @@ class Toy {
 * that, the way some things are accomplished may be needlessly complicated.
 **/
 class Trie {
-    private int switchArr[] =  new int[52]; // A-Z & a-z
-    private char symbolArr[] = new char[2000]; // Arbitrary value for now
-    private int nextArr[] =    new int[2000]; // Arbitrary value for now
-    private int lastPos = 0; // Position of first empty spot in next/symbol arrays
+    private int switchArr[];
+    private ArrayList<Character> symbolArr;
+    private ArrayList<Integer> nextArr;
 
     private String identifier;
-    private int valueOfSymbol;
-    private int currSymIndex;
-    private int ptr;
-    private int seperator;
+    private char delimiter;
 
-    int maxWidth; // Maximum output width allowed (default 68 to match example)
+    // Maximum output width allowed (default 68 to match example)
+    private int maxWidth;
 
     /**
-    * Default constructor of 0 arguments. Always used for initializing the
+    * Default constructor of 0 arguments. Used for initializing the
     * member variables with proper initial values.
     **/
     public Trie() {
-        ptr = 0;
-        seperator = 0;
-        lastPos = 0;
-        valueOfSymbol = 0;
-
+        identifier = "";
+        delimiter = '@';
         maxWidth = 68;
-        
+
+        symbolArr = new ArrayList<>();
+        nextArr = new ArrayList<>();
+        switchArr = new int[52]; // A-Z & a-z
         for (int i = 0; i < switchArr.length; i++)
             switchArr[i] = -1;
-
-        for (int i = 0; i < symbolArr.length; i++)
-            symbolArr[i] = 0;
-
-        for (int i = 0; i < nextArr.length; i++)
-            nextArr[i] = -1;
     }
 
     /**
@@ -149,7 +141,6 @@ class Trie {
     **/
     public void setIdentifier(String id) {
         identifier = id;
-        currSymIndex = 0;
     }
 
     /**
@@ -158,88 +149,80 @@ class Trie {
     * be called first.
     **/
     public void storeIntoTrie() {
-        valueOfSymbol = getNextSymbolVal();
-        boolean exit = false;
-        ptr = switchArr[valueOfSymbol];
+        if (identifier.length() == 0) return;
+
+        char c = identifier.charAt(0);
+        int cv = getSymbolVal(c);
+
+        if (switchArr[cv] == -1)
+            switchArr[cv] = symbolArr.size();
+
+        int iter = switchArr[cv];
+
+        // Handle following symbols in symbol/next array
+        //     Will either insert new symbols into trie or will sit
+        //     at some place in the trie if can't insert anything
+        for (int i = 1; i < identifier.length(); i++) {
+            c = identifier.charAt(i);
+            cv = getSymbolVal(c);
+
+            if (iter >= symbolArr.size()) {
+                symbolArr.add(c);
+                nextArr.add(-1);
+            }
+
+            if (c == symbolArr.get(iter)) {
+                iter += 1;
+            }
+            else { // If symbol not same
+                if (nextArr.get(iter) != -1) { // See where to jump
+                    iter = nextArr.get(iter);
+                    i -= 1;
+                }
+                else { // If jump is not defined
+                    symbolArr.add(c);
+                    int pos = iter;
+                    iter = symbolArr.size();
+                    nextArr.set(pos, iter-1);
+                    nextArr.add(-1);
+                }
+            }
+        }
+
+        // Handle when identifier may already exist in table
+        if (iter < symbolArr.size()) {
+            if (symbolArr.get(iter) == delimiter) {
+                return;
+            }
+            else {
+                if (nextArr.get(iter) == -1) {
+                    nextArr.set(iter, symbolArr.size());
+                }
+                else {
+                    if (symbolArr.get(nextArr.get(iter)) == delimiter)
+                        return;
+                }
+
+            }
+        }
         
-        if (ptr == -1) { // If symbol does not yet exist in table:
-            currSymIndex++; // Consume first symbol,
-            insertIdentifier(); // insert full symbol into table, and
-            return; // exit after inserting full symbol into table
-        }
-        else if (identifier.length() == 1) {
-            return;
-        }
+        symbolArr.add(delimiter);
+        nextArr.add(-1);
 
-        currSymIndex++;
-        valueOfSymbol = getNextSymbolVal();
-        while (!exit) { // Partial symbol handling
-            char c = symbolArr[ptr];
-            int symbolArrVal = Character.getNumericValue(c);
-            if (c >= 'a' && c <= 'z') symbolArrVal += 26 - 10;
-            else                      symbolArrVal -= 10;
-
-            if (symbolArrVal == valueOfSymbol) { // if same char
-                if (currSymIndex < identifier.length()-1) {
-                    ptr++;
-                    currSymIndex++;
-                    valueOfSymbol = getNextSymbolVal();
-                }
-                else { // Reached end, symbol is already in table
-                    exit = true;
-                }
-            }
-            else { // if not same char
-                if (nextArr[ptr] != -1) {
-                    ptr = nextArr[ptr]; // If capable jump, go to it
-                }
-                else { // Insert partial symbol into table if no jump is possible
-                    insertIdentifier();
-                    exit = true;
-                }
-            }
-        }
     }
 
     /**
-    * Retrieves the next symbol from the identifier. Relies on currSymIndex,
-    * so that must be incremented externally within this class.
+    * Retrieves the next symbol from the identifier.
     **/
-    private int getNextSymbolVal() {
+    private int getSymbolVal(char c) {
         if (identifier.length() == 0) return -1;
 
-        char c = identifier.charAt(currSymIndex);
         int out = Character.getNumericValue(c);
 
         if (c >= 'a' && c <= 'z') out += 26 - 10;
         else                      out -= 10;
 
         return out;
-    }
-
-    /**
-    * Inserts the identifier into the trie, starting from the position that
-    * currSymIndex indicates and ending at the end of the identifier.
-    **/
-    private void insertIdentifier() {
-        // If does not exist in switch array
-        if (ptr == -1) { // full symbol insertion
-            switchArr[valueOfSymbol] = lastPos;
-            ptr = switchArr[valueOfSymbol];
-        }
-        else { // partial symbol insertion
-            nextArr[ptr] = lastPos;
-            ptr = nextArr[ptr];
-        }
-
-        int idLen = identifier.length() - currSymIndex;
-        lastPos += idLen;
-
-        for (int i = 0; i < idLen; i++)
-            symbolArr[ptr + i] = identifier.charAt(currSymIndex + i);
-
-        symbolArr[lastPos] = '@';
-        lastPos += 1;
     }
 
     /**
@@ -332,7 +315,7 @@ class Trie {
             String printTop = "";
             String printMid = "";
             String printBot = "";
-        for (int i = 0; i < symbolArr.length; i++) {
+        for (int i = 0; i < symbolArr.size(); i++) {
             if (printTop.equals("")) { // All print* are empty by this conditional
                 printTop = "        ";
                 printMid = "symbol: ";
@@ -340,7 +323,7 @@ class Trie {
             }
         
             int spacePadTop = (String.valueOf(i)).length();
-            int spacePadBot = (String.valueOf(nextArr[i])).length();
+            int spacePadBot = (String.valueOf(nextArr.get(i)).length());
             int spacing = Math.max(spacePadTop, spacePadBot);
             spacing = Math.max(2, spacing); // 2 = minimum spacing
             
@@ -349,14 +332,14 @@ class Trie {
             String botAddChar = "";
 
             topAddChar = String.valueOf(i);
-            midAddChar = String.valueOf(symbolArr[i]);
-            if (nextArr[i] != -1) botAddChar = String.valueOf(nextArr[i]);
+            midAddChar = String.valueOf(symbolArr.get(i));
+            if (nextArr.get(i) != -1) botAddChar = String.valueOf(nextArr.get(i));
 
             printTop += insertSpacing(topAddChar, spacing) + " ";
             printMid += insertSpacing(midAddChar, spacing) + " ";
             printBot += insertSpacing(botAddChar, spacing) + " ";
 
-            if (printTop.length() >= maxWidth || i == symbolArr.length - 1 || symbolArr[i + 1] == 0) {
+            if (printTop.length() >= maxWidth || i == symbolArr.size() - 1) {
                 if (file == null) {
                     System.out.println(printTop);
                     System.out.println(printMid);
@@ -371,8 +354,6 @@ class Trie {
                 }
 
                 printTop = printMid = printBot = "";
-
-                if (symbolArr[i + 1] == 0) break;
             }
         }
     }

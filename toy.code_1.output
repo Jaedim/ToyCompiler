@@ -1,8 +1,8 @@
          A  B  C  D   E   F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T 
-switch: -1 -1 -1 -1 148 133 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+switch: -1 -1 -1 -1 149 133 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
 
          U  V  W  X  Y  Z   a  b  c  d  e  f  g  h  i  j  k  l   m  n 
-switch: -1 -1 -1 -1 -1 -1 147  0 12 17 23 34 -1 -1 42 -1 -1 -1 118 64 
+switch: -1 -1 -1 -1 -1 -1 148  0 12 17 23 34 -1 -1 42 -1 -1 -1 118 64 
 
          o  p  q  r  s   t  u   v   w   x  y  z 
 switch: -1 77 -1 84 95 101 -1 105 109 117 -1 -1 
@@ -24,9 +24,9 @@ next:         44    54                                  57
 symbol:  a  c  e  @  e  w  @  a  r  r  a  y  @  u  l  l  @  r  i  n 
 next:               73    67                                        
 
-        80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 
-symbol:  t  l  n  @  e  a  d  l  n  @  t  u  r  n  @  t  r  i  n  g 
-next:                  90                                           
+        80 81 82 83 84 85 86 87 88 89 90 91 92 93 94  95 96 97 98 99 
+symbol:  t  l  n  @  e  a  d  l  n  @  t  u  r  n  @   t  r  i  n  g 
+next:                  90                            147             
 
         100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 
 symbol:   @   r   u   e   @   o   i   d   @   h   i   l   e   @   c 
@@ -40,12 +40,13 @@ next:
 symbol:   1   0   @   u   n   n   y   @   u   n   n   y   @   l   a 
 next:                                   143                         
 
-        145 146 147 148 
-symbol:   g   @   @   @ 
-next:                   
+        145 146 147 148 149 
+symbol:   g   @   @   @   @ 
+next:                       
 
 
 int id leftparen int id rightparen leftbrace 
+
 if leftparen id greater intconstant rightparen return id multiplication id leftparen id minus intconstant rightparen semicolon 
 else return intconstant semicolon 
 rightbrace 
